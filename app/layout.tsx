@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { AuthProvider } from "@/components/providers/session-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -20,11 +21,13 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={inter.variable}>
       <body className="font-sans">
-        <Header />
-        <main className="mx-auto min-h-screen max-w-5xl px-4 pb-24 pt-4 md:pb-8">
-          {children}
-        </main>
-        <BottomNav />
+        <AuthProvider>
+          <Header />
+          <main className="mx-auto min-h-screen max-w-5xl px-4 pb-24 pt-4 md:pb-8">
+            {children}
+          </main>
+          <BottomNav />
+        </AuthProvider>
       </body>
     </html>
   );

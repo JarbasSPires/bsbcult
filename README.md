@@ -21,6 +21,8 @@ Open http://localhost:3000.
 > `.env` must exist **before** `npm run db:push`: this project uses `prisma.config.ts` (Prisma 7 no longer reads a `url` from `schema.prisma`), which loads `DATABASE_URL` from `.env` via `dotenv/config`. Without it, Prisma commands fail to find the database.
 >
 > `npm install` already runs `prisma generate` automatically (`postinstall` script), so no extra generate step is needed.
+>
+> `NEXTAUTH_SECRET` in `.env` (`"dev-only-secret-change-me"`) is a **dev-only placeholder**. It MUST be replaced with a strong random value (e.g. `openssl rand -base64 32`) before any real/production deployment.
 
 ### Note on Prisma 7
 
