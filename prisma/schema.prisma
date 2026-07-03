@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum EventCategory {
+  SHOW
+  FESTIVAL
+  TEATRO
+  EXPOSICAO
+  CINEMA
+  OUTRO
+}
+
+enum EventStatus {
+  ATIVO
+  ENCERRADO
+  EM_BREVE
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model Event {
+  id              String        @id @default(cuid())
+  title           String
+  description     String
+  category        EventCategory
+  imageUrl        String
+  locationName    String
+  locationAddress String
+  dateStart       DateTime
+  dateEnd         DateTime
+  price           Float?
+  isFree          Boolean       @default(false)
+  organizer       String
+  tags            String
+  featured        Boolean       @default(false)
+  status          EventStatus   @default(ATIVO)
+  createdAt       DateTime      @default(now())
+  favorites       Favorite[]
+}
+
+model Category {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  value       EventCategory @unique
+  icon        String
+  color       String
+  description String
+}
+
+model User {
+  id           String               @id @default(cuid())
+  name         String
+  email        String               @unique
+  passwordHash String
+  avatarUrl    String?
+  role         UserRole             @default(USER)
+  createdAt    DateTime             @default(now())
+  favorites    Favorite[]
+  resetTokens  PasswordResetToken[]
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
