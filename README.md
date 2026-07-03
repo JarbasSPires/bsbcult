@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# BsbCult
 
-## Getting Started
+Seu guia definitivo para a vida cultural no Distrito Federal — descubra shows, festivais, peças de teatro e exposições em Brasília.
 
-First, run the development server:
+## Stack
+
+Next.js 14 (App Router) · TypeScript · Prisma 7 + SQLite (via driver adapter) · NextAuth.js · Tailwind CSS · Vitest
+
+## Setup
 
 ```bash
+npm install
+cp .env.example .env
+npm run db:push
+npm run db:seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> `.env` must exist **before** `npm run db:push`: this project uses `prisma.config.ts` (Prisma 7 no longer reads a `url` from `schema.prisma`), which loads `DATABASE_URL` from `.env` via `dotenv/config`. Without it, Prisma commands fail to find the database.
+>
+> `npm install` already runs `prisma generate` automatically (`postinstall` script), so no extra generate step is needed.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Note on Prisma 7
 
-## Learn More
+This project runs **Prisma 7.8.0**, not the Prisma 5-era setup you might expect:
 
-To learn more about Next.js, take a look at the following resources:
+- The datasource `url` lives in `prisma.config.ts`, not in `schema.prisma` — schema-level `url` is no longer supported.
+- `PrismaClient` requires a **driver adapter** to work with SQLite (`@prisma/adapter-better-sqlite3` + `better-sqlite3`, wired up in `lib/prisma.ts`). A plain `new PrismaClient()` throws at runtime on this version.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Credenciais de teste (seed)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- **Admin:** admin@bsbcult.com / admin123
+- **Usuário:** usuario@bsbcult.com / usuario123
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `npm run dev` — inicia o servidor de desenvolvimento
+- `npm test` — roda a suíte de testes (Vitest)
+- `npm run db:seed` — repopula o banco com dados de exemplo
+- `npm run db:studio` — abre o Prisma Studio
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Status
+
+Fundação (banco de dados, Home, Busca, Calendário, Detalhe do Evento) implementada.
+Autenticação, Favoritos e Painel Admin fazem parte de uma segunda fase de implementação.
