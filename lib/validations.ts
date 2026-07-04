@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const CATEGORY_VALUES = ["SHOW", "FESTIVAL", "TEATRO", "EXPOSICAO", "CINEMA", "OUTRO"] as const;
+
 export const registerSchema = z
   .object({
     name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -30,7 +32,7 @@ export const resetPasswordSchema = z
 export const eventSchema = z.object({
   title: z.string().min(3, "Título muito curto"),
   description: z.string().min(10, "Descrição muito curta"),
-  category: z.enum(["SHOW", "FESTIVAL", "TEATRO", "EXPOSICAO", "CINEMA", "OUTRO"]),
+  category: z.enum(CATEGORY_VALUES),
   imageUrl: z.string().url("URL de imagem inválida"),
   locationName: z.string().min(2),
   locationAddress: z.string().min(2),
@@ -46,7 +48,7 @@ export const eventSchema = z.object({
 
 export const categorySchema = z.object({
   name: z.string().min(2),
-  value: z.enum(["SHOW", "FESTIVAL", "TEATRO", "EXPOSICAO", "CINEMA", "OUTRO"]),
+  value: z.enum(CATEGORY_VALUES),
   icon: z.string().min(2),
   color: z.string().min(4),
   description: z.string().min(2),

@@ -27,6 +27,8 @@ export async function createPasswordResetToken(email: string): Promise<string | 
 
 export async function resetPasswordWithToken(token: string, newPassword: string) {
   const resetToken = await prisma.passwordResetToken.findUnique({ where: { token } });
+  // Same message for "not found" and "expired" deliberately — avoids telling an attacker
+  // which case applies (no token-guessing or expiry oracle).
   if (!resetToken || resetToken.expiresAt < new Date()) {
     throw new Error("Link de redefinição inválido ou expirado");
   }

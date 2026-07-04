@@ -21,6 +21,18 @@ describe("registerUser", () => {
       registerUser({ name: "Outra Ana", email: "ana@example.com", password: "outrasenha" })
     ).rejects.toThrow("Este email já está cadastrado");
   });
+
+  it("normalizes email casing so lookups are case-insensitive", async () => {
+    const user = await registerUser({ name: "Diego", email: "Diego@Example.com", password: "senha123" });
+    expect(user.email).toBe("diego@example.com");
+
+    await expect(
+      registerUser({ name: "Outro Diego", email: "diego@EXAMPLE.com", password: "outrasenha" })
+    ).rejects.toThrow("Este email já está cadastrado");
+
+    const token = await createPasswordResetToken("DIEGO@example.com");
+    expect(token).toBeTruthy();
+  });
 });
 
 describe("password reset flow", () => {
