@@ -6,6 +6,7 @@ import { categoryMap } from "@/lib/category-icons";
 import { CategoryBadge } from "@/components/events/category-badge";
 import { EventCard } from "@/components/events/event-card";
 import { ShareButton } from "@/components/events/share-button";
+import { FavoriteButton } from "@/components/events/favorite-button";
 import { formatPrice, formatEventDate, parseTags } from "@/lib/utils";
 import { MapPin } from "lucide-react";
 
@@ -58,6 +59,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
         )}
 
         <div className="flex gap-3">
+          <FavoriteButton eventId={event.id} />
           <ShareButton title={event.title} />
         </div>
       </div>
