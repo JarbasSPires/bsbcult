@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listEvents } from "@/lib/services/events";
+import { listEvents, createEvent } from "@/lib/services/events";
 import type { EventCategory, EventStatus } from "@prisma/client";
+import { requireAdminSession } from "@/lib/admin-guard";
+import { eventSchema } from "@/lib/validations";
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
@@ -21,4 +23,22 @@ export async function GET(request: NextRequest) {
   });
 
   return NextResponse.json(events);
+}
+
+export async function POST(request: NextRequest) {
+  const session = await requireAdminSession();
+  if (!session) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+
+  const body = await request.json();
+  const parsed = eventSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 });
+  }
+
+  const event = await createEvent({
+    ...parsed.data,
+    dateStart: new Date(parsed.data.dateStart),
+    dateEnd: new Date(parsed.data.dateEnd),
+  });
+  return NextResponse.json(event, { status: 201 });
 }

@@ -59,3 +59,37 @@ export async function getRelatedEvents(event: {
     orderBy: { dateStart: "asc" },
   });
 }
+
+// Named `EventCreateInput` rather than `EventInput` to avoid colliding with the
+// Zod-inferred `EventInput` type exported from `lib/validations.ts` (which represents
+// the raw request-body shape with string dates). This service-layer type represents
+// the shape needed by Prisma, with `dateStart`/`dateEnd` as `Date` objects. Any file
+// that needs both (e.g. the API routes) can import each under its own distinct name.
+export interface EventCreateInput {
+  title: string;
+  description: string;
+  category: EventCategory;
+  imageUrl: string;
+  locationName: string;
+  locationAddress: string;
+  dateStart: Date;
+  dateEnd: Date;
+  price: number | null;
+  isFree: boolean;
+  organizer: string;
+  tags: string[];
+  featured: boolean;
+  status: EventStatus;
+}
+
+export async function createEvent(data: EventCreateInput): Promise<Event> {
+  return prisma.event.create({ data: { ...data, tags: JSON.stringify(data.tags) } });
+}
+
+export async function updateEvent(id: string, data: EventCreateInput): Promise<Event> {
+  return prisma.event.update({ where: { id }, data: { ...data, tags: JSON.stringify(data.tags) } });
+}
+
+export async function deleteEvent(id: string): Promise<void> {
+  await prisma.event.delete({ where: { id } });
+}
