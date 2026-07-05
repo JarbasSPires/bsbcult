@@ -45,5 +45,6 @@ This project runs **Prisma 7.8.0**, not the Prisma 5-era setup you might expect:
 
 ## Status
 
-Fundação (banco de dados, Home, Busca, Calendário, Detalhe do Evento) implementada.
-Autenticação, Favoritos e Painel Admin fazem parte de uma segunda fase de implementação.
+Aplicação completa: navegação pública (Home, Busca, Calendário, Detalhe do Evento),
+autenticação (Cadastro, Login, Esqueci/Redefinir senha), Favoritos, e Painel
+Administrativo (Dashboard, CRUD de Eventos e Categorias, listagem de Usuários).
