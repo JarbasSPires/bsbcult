@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
+import { UserMenu } from "@/components/layout/user-menu";
 
 export function Header() {
   return (
@@ -27,6 +28,7 @@ export function Header() {
             />
           </div>
         </form>
+        <UserMenu />
       </div>
     </header>
   );
