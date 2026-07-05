@@ -10,19 +10,31 @@ export default function ForgotPasswordPage() {
   const [resetLink, setResetLink] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
     setLoading(true);
-    const res = await fetch("/api/auth/forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    setSent(true);
-    setResetLink(data.resetLink ?? null);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setLoading(false);
+        setError("Não foi possível processar o pedido. Confira o email informado.");
+        return;
+      }
+      setLoading(false);
+      setSent(true);
+      setResetLink(data.resetLink ?? null);
+    } catch {
+      setLoading(false);
+      setError("Erro de conexão. Tente novamente.");
+    }
   }
 
   return (
@@ -43,6 +55,7 @@ export default function ForgotPasswordPage() {
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Enviando..." : "Enviar link de recuperação"}
           </Button>
