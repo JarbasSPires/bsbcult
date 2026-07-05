@@ -2,6 +2,12 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
+// Precomputed bcrypt hash of a random placeholder (never a real password). Used to burn a
+// constant, deliberately slow amount of time on every createPasswordResetToken call — hit or
+// miss — so response latency doesn't leak whether an email is registered (same timing
+// side-channel mitigation as lib/auth.ts's authorize()).
+const RESET_TOKEN_DUMMY_HASH = "$2b$10$hm1wXPNI1Sdufy/IpCKv/OHTGNF0sV1i47mkzxroRNciDraasMxIG";
+
 export async function registerUser(data: { name: string; email: string; password: string }) {
   const email = data.email.toLowerCase();
 
@@ -16,6 +22,10 @@ export async function registerUser(data: { name: string; email: string; password
 
 export async function createPasswordResetToken(email: string): Promise<string | null> {
   const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+  // Always pay the bcrypt cost, hit or miss, so the DB-write-only-on-hit path doesn't create
+  // a measurable timing gap that lets an attacker enumerate registered emails.
+  await bcrypt.compare("reset-token-timing-padding", RESET_TOKEN_DUMMY_HASH);
+
   if (!user) return null;
 
   const token = crypto.randomBytes(32).toString("hex");
