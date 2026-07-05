@@ -18,6 +18,10 @@ export const forgotPasswordSchema = z.object({
   email: z.string().email("Email inválido"),
 });
 
+export const favoriteSchema = z.object({
+  eventId: z.string().min(1, "eventId é obrigatório"),
+});
+
 export const resetPasswordSchema = z
   .object({
     token: z.string().min(1, "Token é obrigatório"),
