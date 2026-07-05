@@ -37,6 +37,11 @@ export default function LoginPage() {
           Conta criada! Faça login para continuar.
         </p>
       )}
+      {searchParams.get("reset") && (
+        <p className="rounded-xl bg-green-50 p-3 text-sm text-green-700">
+          Senha redefinida com sucesso! Faça login com a nova senha.
+        </p>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <Input type="password" placeholder="Senha" value={password} onChange={(e) => setPassword(e.target.value)} />

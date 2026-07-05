@@ -27,7 +27,12 @@ export default function ResetPasswordPage() {
       setLoading(false);
       if (!res.ok) {
         const data = await res.json();
-        setError(typeof data.error === "string" ? data.error : "Não foi possível redefinir a senha");
+        if (typeof data.error === "string") {
+          setError(data.error);
+        } else {
+          const firstFieldError = Object.values(data.error ?? {})[0] as string[] | undefined;
+          setError(firstFieldError?.[0] ?? "Não foi possível redefinir a senha");
+        }
         return;
       }
       router.push("/login?reset=true");
