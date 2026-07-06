@@ -18,7 +18,7 @@ export function BottomNav() {
   const { data: session } = useSession();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-gray-100 bg-white md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-gray-100 bg-white">
       <div className="mx-auto flex max-w-5xl justify-around px-2 py-2">
         {baseItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;

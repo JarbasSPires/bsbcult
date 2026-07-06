@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className="font-sans">
         <AuthProvider>
           <Header />
-          <main className="mx-auto min-h-screen max-w-5xl px-4 pb-24 pt-4 md:pb-8">
+          <main className="mx-auto min-h-screen max-w-5xl px-4 pb-24 pt-4">
             {children}
           </main>
           <BottomNav />
