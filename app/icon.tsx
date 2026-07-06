@@ -6,7 +6,7 @@ export const size = { width: 512, height: 512 };
 export const contentType = "image/png";
 
 export default async function Icon() {
-  const fontData = await readFile(join(process.cwd(), "app/assets/inter-bold.ttf"));
+  const fontData = await readFile(join(process.cwd(), "app/assets/icon-font.ttf"));
 
   return new ImageResponse(
     (
@@ -21,12 +21,12 @@ export default async function Icon() {
           borderRadius: 96,
         }}
       >
-        <span style={{ fontSize: 260, color: "#ffffff", fontFamily: "Inter" }}>B</span>
+        <span style={{ fontSize: 260, color: "#ffffff", fontFamily: "IconFont" }}>B</span>
       </div>
     ),
     {
       ...size,
-      fonts: [{ name: "Inter", data: fontData, style: "normal", weight: 700 }],
+      fonts: [{ name: "IconFont", data: fontData, style: "normal", weight: 700 }],
     }
   );
 }

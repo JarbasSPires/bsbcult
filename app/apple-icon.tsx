@@ -8,7 +8,7 @@ export const contentType = "image/png";
 // No border-radius here on purpose: iOS applies its own rounded-corner mask
 // to home screen icons, so a pre-rounded icon would show a visible double edge.
 export default async function AppleIcon() {
-  const fontData = await readFile(join(process.cwd(), "app/assets/inter-bold.ttf"));
+  const fontData = await readFile(join(process.cwd(), "app/assets/icon-font.ttf"));
 
   return new ImageResponse(
     (
@@ -22,12 +22,12 @@ export default async function AppleIcon() {
           background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
         }}
       >
-        <span style={{ fontSize: 96, color: "#ffffff", fontFamily: "Inter" }}>B</span>
+        <span style={{ fontSize: 96, color: "#ffffff", fontFamily: "IconFont" }}>B</span>
       </div>
     ),
     {
       ...size,
-      fonts: [{ name: "Inter", data: fontData, style: "normal", weight: 700 }],
+      fonts: [{ name: "IconFont", data: fontData, style: "normal", weight: 700 }],
     }
   );
 }
