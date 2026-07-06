@@ -11,6 +11,16 @@ export const metadata: Metadata = {
   title: "BsbCult — Guia Cultural de Brasília",
   description:
     "Seu guia definitivo para a vida cultural no Distrito Federal: shows, festivais, teatro, exposições e cinema.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "BsbCult",
+  },
+};
+
+export const viewport = {
+  themeColor: "#6366f1",
 };
 
 export default function RootLayout({
