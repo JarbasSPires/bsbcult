@@ -4,7 +4,7 @@ Seu guia definitivo para a vida cultural no Distrito Federal — descubra shows,
 
 ## Stack
 
-Next.js 14 (App Router) · TypeScript · Prisma 7 + SQLite (via driver adapter) · NextAuth.js · Tailwind CSS · Vitest
+Next.js 14 (App Router) · TypeScript · Prisma 7 + libSQL/Turso (via driver adapter) · NextAuth.js · Tailwind CSS · Vitest
 
 ## Setup
 
@@ -29,7 +29,8 @@ Open http://localhost:3000.
 This project runs **Prisma 7.8.0**, not the Prisma 5-era setup you might expect:
 
 - The datasource `url` lives in `prisma.config.ts`, not in `schema.prisma` — schema-level `url` is no longer supported.
-- `PrismaClient` requires a **driver adapter** to work with SQLite (`@prisma/adapter-better-sqlite3` + `better-sqlite3`, wired up in `lib/prisma.ts`). A plain `new PrismaClient()` throws at runtime on this version.
+- `PrismaClient` requires a **driver adapter** to work with SQLite (`@prisma/adapter-libsql` + `@libsql/client`, wired up in `lib/prisma.ts`). A plain `new PrismaClient()` throws at runtime on this version.
+- The libSQL adapter works transparently against a local SQLite file (`DATABASE_URL="file:./prisma/dev.db"`, no token needed) in development, and against a remote **Turso** database (`DATABASE_URL="libsql://..."` + `TURSO_AUTH_TOKEN`) in production — no code changes between environments, only env vars.
 
 ## Credenciais de teste (seed)
 
