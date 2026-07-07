@@ -1,0 +1,22 @@
+[
+  {
+    "id": 59233,
+    "date": "2026-06-18T10:59:35",
+    "link": "https://clubedochoro.com.br/07-07-baile-da-nomma-comemoracao-de-30-anos-de-carreira/",
+    "title": { "rendered": "07/07 &#8211; BAILE DA NOMMA – COMEMORAÇÃO DE 30 ANOS DE CARREIRA" },
+    "excerpt": { "rendered": "", "protected": false },
+    "_embedded": {
+      "wp:featuredmedia": [
+        { "source_url": "https://clubedochoro.com.br/wp-content/uploads/2026/06/imagem_2026-06-18_105700495.png" }
+      ]
+    }
+  },
+  {
+    "id": 59202,
+    "date": "2026-06-16T12:28:17",
+    "link": "https://clubedochoro.com.br/09-07-escafandristas-cantam-buarque/",
+    "title": { "rendered": "09/07 &#8211; ESCAFANDRISTAS cantam BUARQUE" },
+    "excerpt": { "rendered": "<p>Um tributo &agrave; obra de Chico Buarque.</p>", "protected": false },
+    "_embedded": {}
+  }
+]
