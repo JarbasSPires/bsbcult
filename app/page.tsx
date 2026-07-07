@@ -17,7 +17,7 @@ export default async function HomePage() {
     <div className="space-y-10">
       <section>
         <h2 className="mb-3 text-lg font-semibold text-gray-900">Categorias</h2>
-        <CategoryScroller categories={categories} />
+        <CategoryScroller categories={categories.filter((c) => c.value !== "OUTRO")} />
       </section>
 
       <section>
