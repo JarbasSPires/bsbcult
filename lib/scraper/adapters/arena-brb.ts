@@ -40,24 +40,32 @@ export function parseAgendaHtml(html: string): NormalizedEvent[] {
 
     if (!title || !detailUrl || !dateText) return;
 
-    const dateStart = parseSlashDate(dateText);
+    try {
+      const dateStart = parseSlashDate(dateText);
 
-    events.push({
-      externalId: slugFromUrl(detailUrl),
-      title,
-      description: description || FALLBACK_DESCRIPTION,
-      category: "OUTRO",
-      imageUrl: imageUrl ?? FALLBACK_IMAGE,
-      locationName: locationName || DEFAULT_LOCATION,
-      locationAddress: DEFAULT_ADDRESS,
-      dateStart,
-      dateEnd: endOfDay(dateStart),
-      price: null,
-      isFree: false,
-      organizer: "Arena BRB",
-      tags: ["arena brb"],
-      sourceUrl: detailUrl,
-    });
+      events.push({
+        externalId: slugFromUrl(detailUrl),
+        title,
+        description: description || FALLBACK_DESCRIPTION,
+        category: "OUTRO",
+        imageUrl: imageUrl ?? FALLBACK_IMAGE,
+        locationName: locationName || DEFAULT_LOCATION,
+        locationAddress: DEFAULT_ADDRESS,
+        dateStart,
+        dateEnd: endOfDay(dateStart),
+        price: null,
+        isFree: false,
+        organizer: "Arena BRB",
+        tags: ["arena brb"],
+        sourceUrl: detailUrl,
+      });
+    } catch (error) {
+      console.warn(
+        `[arena-brb] Falha ao processar item "${title}" (${detailUrl}): ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
   });
 
   return events;
