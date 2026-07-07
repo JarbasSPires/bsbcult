@@ -29,4 +29,19 @@ describe("parseWordPressPosts", () => {
     expect(events[1].description).toBe("Um tributo à obra de Chico Buarque.");
     expect(events[1].imageUrl).toContain("clubedochoro.com.br");
   });
+
+  it("skips a post with a null title instead of throwing or discarding the batch", () => {
+    const raw = readFileSync(join(process.cwd(), "tests/fixtures/clube-do-choro-posts.json"), "utf-8");
+
+    expect(() => parseWordPressPosts(JSON.parse(raw))).not.toThrow();
+
+    const events = parseWordPressPosts(JSON.parse(raw));
+
+    // The fixture has 3 posts: 2 well-formed + 1 with title.rendered === null
+    // (which would throw inside he.decode without the fault-isolation guard).
+    // Only the 2 well-formed events should be returned.
+    expect(events).toHaveLength(2);
+    expect(events.map((event) => event.externalId)).toEqual(["59233", "59202"]);
+    expect(events.some((event) => event.externalId === "59300")).toBe(false);
+  });
 });
