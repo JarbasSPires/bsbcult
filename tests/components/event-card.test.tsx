@@ -33,4 +33,9 @@ describe("EventCard", () => {
     render(<EventCard event={baseEvent} category={category} />);
     expect(screen.getByRole("link")).toHaveAttribute("href", "/eventos/1");
   });
+
+  it("shows a fallback label when price is unknown and the event isn't free", () => {
+    render(<EventCard event={{ ...baseEvent, isFree: false, price: null }} category={category} />);
+    expect(screen.getByText("Confira o valor no site oficial")).toBeInTheDocument();
+  });
 });
