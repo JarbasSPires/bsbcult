@@ -8,7 +8,9 @@ import { EventCard } from "@/components/events/event-card";
 import { ShareButton } from "@/components/events/share-button";
 import { FavoriteButton } from "@/components/events/favorite-button";
 import { formatPrice, formatEventDate, parseTags } from "@/lib/utils";
-import { MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AddToCalendarButton } from "@/components/events/add-to-calendar-button";
+import { MapPin, Ticket } from "lucide-react";
 
 export default async function EventDetailPage({ params }: { params: { id: string } }) {
   const event = await getEventById(params.id);
@@ -45,7 +47,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
         </div>
 
         <p className={event.isFree ? "text-lg font-bold text-primary" : "text-lg font-bold text-gray-900"}>
-          {formatPrice(event.price, event.isFree)}
+          {event.isFree || event.price != null ? formatPrice(event.price, event.isFree) : "Confira o valor no site oficial"}
         </p>
 
         {tags.length > 0 && (
@@ -58,9 +60,26 @@ export default async function EventDetailPage({ params }: { params: { id: string
           </div>
         )}
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <FavoriteButton eventId={event.id} />
           <ShareButton title={event.title} />
+          {event.sourceUrl && (
+            <a href={event.sourceUrl} target="_blank" rel="noopener noreferrer">
+              <Button variant="secondary">
+                <Ticket className="h-4 w-4" />
+                Comprar Ingresso
+              </Button>
+            </a>
+          )}
+          <AddToCalendarButton
+            id={event.id}
+            title={event.title}
+            description={event.description}
+            locationName={event.locationName}
+            locationAddress={event.locationAddress}
+            dateStart={event.dateStart}
+            dateEnd={event.dateEnd}
+          />
         </div>
       </div>
 
