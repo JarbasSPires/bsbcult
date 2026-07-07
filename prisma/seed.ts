@@ -9,6 +9,7 @@ const categories = [
   { name: "Teatro", value: "TEATRO" as const, icon: "Theater", color: "#ec4899", description: "Peças, comédias e espetáculos" },
   { name: "Exposição", value: "EXPOSICAO" as const, icon: "ImageIcon", color: "#10b981", description: "Exposições de arte, fotografia e história" },
   { name: "Cinema", value: "CINEMA" as const, icon: "Film", color: "#0ea5e9", description: "Filmes e mostras de cinema" },
+  { name: "Outro", value: "OUTRO" as const, icon: "Sparkles", color: "#64748b", description: "Outras atrações culturais e de entretenimento" },
 ];
 
 const events: {
