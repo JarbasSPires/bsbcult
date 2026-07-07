@@ -24,7 +24,6 @@ de novos filtros e dois botões novos no card/detalhe do evento.
 | 7 | SESI Lab | `sesilab.com.br` | HTML (Liferay) |
 | 8 | Secretaria de Cultura do DF | `cultura.df.gov.br` | HTML (Liferay/GDF) |
 | 9 | SESC-DF | `sescdf.com.br` | HTML (Liferay + Senna.js) |
-| 10 | Expressão Brasiliense | `expressaobrasiliense.com/cultura/` | WordPress (`wp-json`) |
 
 Descartadas nesta fase (decisão explícita do usuário): De Boa Brasília,
 Metrópoles, Correio Braziliense (sites de imprensa, sem dados estruturados
@@ -32,6 +31,41 @@ de evento — exigiriam extração de texto livre, técnica diferente de
 parsing de listagem); Espaço Cultural Renato Russo e Funarte (sem
 calendário próprio independente — seus eventos já aparecem via Sympla e/ou
 Secretaria de Cultura do DF).
+
+**Reclassificada durante a pesquisa de implementação:** Expressão
+Brasiliense (`expressaobrasiliense.com/cultura/`) tem `wp-json`
+funcional, mas a página em si é uma listagem de notícias (`post-title`,
+conteúdo de "notícia"), estruturalmente igual às fontes de imprensa já
+descartadas acima — não uma agenda de eventos. Movida para o mesmo grupo
+descartado; o total de fontes ativas do Grupo A cai para 9.
+
+## Fases de implementação
+
+Pesquisa de selectors reais (não suposição) confirmou que cada fonte HTML
+exige inspeção manual do markup ao vivo antes de poder escrever um parser
+sem placeholders — isso é trabalho normal de engenharia de scraper, não
+algo resolvível só no design. Duas fontes já foram inspecionadas e
+confirmadas com dados reais de produção:
+
+- **Arena BRB** — HTML renderizado no servidor, com um repetidor
+  dedicado de agenda (classes `agenda-repeater-item*`, sem framework de
+  post/blog misturado): título, data (`DD/MM/AA`) e local em elementos
+  próprios, link para página de detalhe do evento.
+- **Clube do Choro** — API REST do WordPress
+  (`/wp-json/wp/v2/posts?categories=27`) retorna posts que são,
+  de fato, eventos individuais, com título no padrão `"DD/MM – Nome do
+  evento"` e `link` para a página do evento.
+
+**Fase 1 (este plano):** infraestrutura genérica completa (schema,
+dedup, histórico, runner, GitHub Actions, UI) + adapters para essas 2
+fontes já confirmadas.
+
+**Fase 2 (plano futuro):** adapters para as 7 fontes restantes
+(Shotgun/Infinu, Sympla, Toinha, Caixa Cultural, SESI Lab, Secretaria de
+Cultura do DF, SESC-DF), cada uma exigindo sua própria sessão de inspeção
+de markup ao vivo antes de codificar — Shotgun em particular retornou
+HTTP 429 (proteção anti-bot) na checagem inicial e pode exigir tratamento
+à parte.
 
 **Risco conhecido, a resolver durante implementação (não bloqueia o
 design):** para Caixa Cultural, Secretaria de Cultura do DF e SESC-DF, a
@@ -142,11 +176,13 @@ mudou, grava uma linha em `EventChangeLog` com valor antigo/novo — isso
 cobre o requisito de rastrear mudanças de data, preço ou local de um
 evento já publicado.
 
-**Eventos que somem da fonte:** se um evento com `sourceId` não aparece em
-duas execuções consecutivas do scraper e sua `dateEnd` ainda não passou,
-o runner marca `status: ENCERRADO` (tratado como possivelmente cancelado).
-Eventos com `dateEnd` no passado já seguem essa mesma regra
-independentemente do scraper.
+**Eventos que somem da fonte:** se um evento com `sourceId` não aparece
+mais na execução atual do scraper (não teve `lastSeenAt` atualizado nesta
+rodada) e sua `dateEnd` ainda não passou, o runner marca `status:
+ENCERRADO` (tratado como possivelmente cancelado). Esta é a única regra
+de expiração automática do sistema — hoje o app não tem nenhum processo
+que marca eventos manuais como `ENCERRADO` por data (isso continua
+manual pelo admin, sem mudança de comportamento existente).
 
 ## Filtros de busca (adição)
 

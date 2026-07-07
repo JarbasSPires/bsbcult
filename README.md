@@ -43,6 +43,28 @@ This project runs **Prisma 7.8.0**, not the Prisma 5-era setup you might expect:
 - `npm test` — roda a suíte de testes (Vitest)
 - `npm run db:seed` — repopula o banco com dados de exemplo
 - `npm run db:studio` — abre o Prisma Studio
+- `npm run scrape` — roda a agregação automática de eventos (ver seção abaixo)
+
+## Agregação automática de eventos (scraper)
+
+Um workflow do GitHub Actions (`.github/workflows/scrape-events.yml`) roda
+diariamente às 6h (horário de Brasília) e busca eventos em fontes externas
+estruturadas (hoje: Arena BRB e Clube do Choro — cobertura de mais fontes é
+trabalho incremental, ver `docs/superpowers/specs/2026-07-06-event-aggregation-design.md`).
+
+Rodar localmente:
+
+```bash
+npm run scrape
+```
+
+Requer os mesmos `DATABASE_URL`/`TURSO_AUTH_TOKEN` do `.env`. Em produção, o
+workflow do GitHub Actions usa os secrets do repositório (`Settings > Secrets
+and variables > Actions`) com os mesmos valores configurados na Vercel.
+
+Eventos coletados automaticamente têm `sourceUrl` preenchido e mostram um
+botão extra "Comprar Ingresso" na página de detalhe, linkando para a página
+original da fonte.
 
 ## Status
 

@@ -40,7 +40,7 @@ export function EventCard({
             <span className="line-clamp-1">{event.locationName}</span>
           </div>
           <p className={event.isFree ? "font-semibold text-primary" : "font-semibold text-gray-800"}>
-            {formatPrice(event.price, event.isFree)}
+            {event.isFree || event.price != null ? formatPrice(event.price, event.isFree) : "Confira o valor no site oficial"}
           </p>
         </div>
       </Card>

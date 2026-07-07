@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
   const isFreeParam = params.get("isFree");
   const dateFromParam = params.get("dateFrom");
   const dateToParam = params.get("dateTo");
+  const sourceId = params.get("sourceId") ?? undefined;
 
   const events = await listEvents({
     q,
@@ -20,6 +21,7 @@ export async function GET(request: NextRequest) {
     isFree: isFreeParam === null ? undefined : isFreeParam === "true",
     dateFrom: dateFromParam ? new Date(dateFromParam) : undefined,
     dateTo: dateToParam ? new Date(dateToParam) : undefined,
+    sourceId,
   });
 
   return NextResponse.json(events);

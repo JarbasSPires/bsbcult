@@ -2,9 +2,15 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import type { Category } from "@prisma/client";
+import type { Category, EventSource } from "@prisma/client";
 
-export function SearchFilters({ categories }: { categories: Category[] }) {
+export function SearchFilters({
+  categories,
+  sources,
+}: {
+  categories: Category[];
+  sources: EventSource[];
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -43,6 +49,19 @@ export function SearchFilters({ categories }: { categories: Category[] }) {
           <option value="">Gratuito ou pago</option>
           <option value="true">Gratuito</option>
           <option value="false">Pago</option>
+        </select>
+        <select
+          className="h-10 rounded-xl border border-gray-300 bg-white px-3 text-sm"
+          defaultValue={searchParams.get("sourceId") ?? ""}
+          onChange={(e) => updateParam("sourceId", e.target.value)}
+        >
+          <option value="">Todas as fontes</option>
+          <option value="MANUAL">Cadastrado manualmente</option>
+          {sources.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
         </select>
       </div>
     </div>

@@ -64,6 +64,28 @@ describe("listEvents", () => {
     const result = await listEvents();
     expect(result.map((e) => e.title)).toEqual(["Antes", "Depois"]);
   });
+
+  it("filters by sourceId", async () => {
+    const source = await prisma.eventSource.create({
+      data: { name: "Arena BRB", slug: "arena-brb", baseUrl: "https://arenabsb.com.br", adapterType: "HTML" },
+    });
+    await makeEvent({ title: "Da Arena", sourceId: source.id });
+    await makeEvent({ title: "Manual" });
+
+    const result = await listEvents({ sourceId: source.id });
+    expect(result.map((e) => e.title)).toEqual(["Da Arena"]);
+  });
+
+  it("filters to only manually-created events with the MANUAL sentinel", async () => {
+    const source = await prisma.eventSource.create({
+      data: { name: "Arena BRB", slug: "arena-brb", baseUrl: "https://arenabsb.com.br", adapterType: "HTML" },
+    });
+    await makeEvent({ title: "Da Arena", sourceId: source.id });
+    await makeEvent({ title: "Manual" });
+
+    const result = await listEvents({ sourceId: "MANUAL" });
+    expect(result.map((e) => e.title)).toEqual(["Manual"]);
+  });
 });
 
 describe("getFeaturedEvents", () => {

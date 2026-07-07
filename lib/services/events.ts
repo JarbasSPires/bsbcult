@@ -8,6 +8,7 @@ export interface EventFilters {
   status?: EventStatus;
   dateFrom?: Date;
   dateTo?: Date;
+  sourceId?: string;
 }
 
 export async function listEvents(filters: EventFilters = {}): Promise<Event[]> {
@@ -23,6 +24,8 @@ export async function listEvents(filters: EventFilters = {}): Promise<Event[]> {
   if (filters.category) where.category = filters.category;
   if (filters.isFree !== undefined) where.isFree = filters.isFree;
   if (filters.status) where.status = filters.status;
+  if (filters.sourceId === "MANUAL") where.sourceId = null;
+  else if (filters.sourceId) where.sourceId = filters.sourceId;
   if (filters.dateFrom || filters.dateTo) {
     where.dateStart = {
       ...(filters.dateFrom ? { gte: filters.dateFrom } : {}),
