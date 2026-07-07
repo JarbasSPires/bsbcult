@@ -28,7 +28,7 @@ enum UserRole {
 }
 
 model Event {
-  id              String        @id @default(cuid())
+  id              String           @id @default(cuid())
   title           String
   description     String
   category        EventCategory
@@ -38,12 +38,12 @@ model Event {
   dateStart       DateTime
   dateEnd         DateTime
   price           Float?
-  isFree          Boolean       @default(false)
+  isFree          Boolean          @default(false)
   organizer       String
   tags            String
-  featured        Boolean       @default(false)
-  status          EventStatus   @default(ATIVO)
-  createdAt       DateTime      @default(now())
+  featured        Boolean          @default(false)
+  status          EventStatus      @default(ATIVO)
+  createdAt       DateTime         @default(now())
   sourceId        String?
   source          EventSource?     @relation(fields: [sourceId], references: [id])
   sourceUrl       String?
