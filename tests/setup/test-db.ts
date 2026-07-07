@@ -13,7 +13,9 @@ beforeAll(() => {
 afterEach(async () => {
   await prisma.favorite.deleteMany();
   await prisma.passwordResetToken.deleteMany();
+  await prisma.eventChangeLog.deleteMany();
   await prisma.event.deleteMany();
+  await prisma.eventSource.deleteMany();
   await prisma.category.deleteMany();
   await prisma.user.deleteMany();
 });

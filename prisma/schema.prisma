@@ -44,7 +44,15 @@ model Event {
   featured        Boolean       @default(false)
   status          EventStatus   @default(ATIVO)
   createdAt       DateTime      @default(now())
+  sourceId        String?
+  source          EventSource?     @relation(fields: [sourceId], references: [id])
+  sourceUrl       String?
+  externalId      String?
+  lastSeenAt      DateTime?
+  history         EventChangeLog[]
   favorites       Favorite[]
+
+  @@unique([sourceId, externalId])
 }
 
 model Category {
@@ -54,6 +62,29 @@ model Category {
   icon        String
   color       String
   description String
+}
+
+model EventSource {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  slug          String    @unique
+  baseUrl       String
+  adapterType   String
+  active        Boolean   @default(true)
+  lastRunAt     DateTime?
+  lastRunStatus String?
+  lastRunError  String?
+  events        Event[]
+}
+
+model EventChangeLog {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  changedAt DateTime @default(now())
+  field     String
+  oldValue  String?
+  newValue  String?
 }
 
 model User {
