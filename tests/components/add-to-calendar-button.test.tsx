@@ -32,4 +32,23 @@ describe("AddToCalendarButton", () => {
 
     clickSpy.mockRestore();
   });
+
+  it("generates a diacritic-free filename slug from an accented title", async () => {
+    URL.createObjectURL = vi.fn(() => "blob:mock-url");
+    URL.revokeObjectURL = vi.fn();
+
+    let capturedDownload = "";
+    const clickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        capturedDownload = this.download;
+      });
+
+    render(<AddToCalendarButton {...baseProps} title="Baile da Nomma – Comemoração" />);
+    await userEvent.click(screen.getByRole("button", { name: /adicionar à agenda/i }));
+
+    expect(capturedDownload).toBe("baile-da-nomma-comemoracao.ics");
+
+    clickSpy.mockRestore();
+  });
 });

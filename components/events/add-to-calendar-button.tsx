@@ -14,6 +14,16 @@ interface AddToCalendarButtonProps {
   dateEnd: Date;
 }
 
+function buildFileSlug(title: string, fallbackId: string): string {
+  const slug = title
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/gi, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase();
+  return slug || fallbackId;
+}
+
 export function AddToCalendarButton(event: AddToCalendarButtonProps) {
   function handleClick() {
     const ics = buildIcsFile(event);
@@ -21,7 +31,7 @@ export function AddToCalendarButton(event: AddToCalendarButtonProps) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${event.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.ics`;
+    link.download = `${buildFileSlug(event.title, event.id)}.ics`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
