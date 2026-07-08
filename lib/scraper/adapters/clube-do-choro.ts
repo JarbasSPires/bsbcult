@@ -67,6 +67,8 @@ function parsePost(post: WordPressPost): NormalizedEvent | null {
       organizer: "Clube do Choro",
       tags: ["choro", "música ao vivo"],
       sourceUrl: post.link,
+      ageRating: null,
+      soldOut: false,
     };
   } catch (error) {
     console.warn(

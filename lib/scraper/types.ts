@@ -15,6 +15,8 @@ export interface NormalizedEvent {
   organizer: string;
   tags: string[];
   sourceUrl: string;
+  ageRating: string | null;
+  soldOut: boolean;
 }
 
 export interface EventSourceAdapter {

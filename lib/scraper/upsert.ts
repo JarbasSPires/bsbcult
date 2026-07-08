@@ -113,7 +113,15 @@ async function upsertNormalizedEvent(sourceId: string, normalized: NormalizedEve
   });
   const duplicate = findCrossSourceDuplicate(normalized, sameDayEvents);
   if (duplicate) {
-    await prisma.event.update({ where: { id: duplicate.id }, data: { lastSeenAt: new Date() } });
+    const existing = await prisma.event.findUnique({ where: { id: duplicate.id } });
+    await prisma.event.update({
+      where: { id: duplicate.id },
+      data: {
+        lastSeenAt: new Date(),
+        price: existing?.price ?? normalized.price,
+        ageRating: existing?.ageRating ?? normalized.ageRating,
+      },
+    });
     return;
   }
 
@@ -131,6 +139,8 @@ async function upsertNormalizedEvent(sourceId: string, normalized: NormalizedEve
       isFree: normalized.isFree,
       organizer: normalized.organizer,
       tags: JSON.stringify(normalized.tags),
+      ageRating: normalized.ageRating,
+      soldOut: normalized.soldOut,
       status: "ATIVO",
       sourceId,
       sourceUrl: normalized.sourceUrl,
@@ -141,7 +151,16 @@ async function upsertNormalizedEvent(sourceId: string, normalized: NormalizedEve
 }
 
 async function applyUpdate(
-  existing: { id: string; dateStart: Date; dateEnd: Date; price: number | null; locationName: string; status: string },
+  existing: {
+    id: string;
+    dateStart: Date;
+    dateEnd: Date;
+    price: number | null;
+    locationName: string;
+    status: string;
+    ageRating: string | null;
+    soldOut: boolean;
+  },
   normalized: NormalizedEvent
 ): Promise<void> {
   const changes: { field: string; oldValue: string | null; newValue: string | null }[] = [];
@@ -173,6 +192,13 @@ async function applyUpdate(
   if (existing.status !== "ATIVO") {
     changes.push({ field: "status", oldValue: existing.status, newValue: "ATIVO" });
   }
+  if (existing.soldOut !== normalized.soldOut) {
+    changes.push({
+      field: "soldOut",
+      oldValue: String(existing.soldOut),
+      newValue: String(normalized.soldOut),
+    });
+  }
 
   await prisma.event.update({
     where: { id: existing.id },
@@ -186,6 +212,8 @@ async function applyUpdate(
       locationName: normalized.locationName,
       locationAddress: normalized.locationAddress,
       imageUrl: normalized.imageUrl,
+      ageRating: normalized.ageRating,
+      soldOut: normalized.soldOut,
       status: "ATIVO",
       lastSeenAt: new Date(),
     },

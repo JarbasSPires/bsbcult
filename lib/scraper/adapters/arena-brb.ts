@@ -58,6 +58,8 @@ export function parseAgendaHtml(html: string): NormalizedEvent[] {
         organizer: "Arena BRB",
         tags: ["arena brb"],
         sourceUrl: detailUrl,
+        ageRating: null,
+        soldOut: false,
       });
     } catch (error) {
       console.warn(
