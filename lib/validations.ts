@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-export const CATEGORY_VALUES = ["SHOW", "FESTIVAL", "TEATRO", "EXPOSICAO", "CINEMA", "OUTRO"] as const;
+export const CATEGORY_VALUES = [
+  "SHOW", "FESTIVAL", "TEATRO", "EXPOSICAO", "CINEMA",
+  "FEIRA", "PALESTRA", "GASTRONOMIA", "INFANTIL", "CULTURA_POPULAR",
+  "OUTRO",
+] as const;
 
 export const registerSchema = z
   .object({

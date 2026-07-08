@@ -1,4 +1,4 @@
-import { Music, PartyPopper, Theater, ImageIcon, Film, Sparkles, type LucideIcon } from "lucide-react";
+import { Music, PartyPopper, Theater, ImageIcon, Film, Store, Mic, UtensilsCrossed, Baby, Drum, Sparkles, type LucideIcon } from "lucide-react";
 import type { Category, EventCategory } from "@prisma/client";
 
 export const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -7,6 +7,11 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   Theater,
   ImageIcon,
   Film,
+  Store,
+  Mic,
+  UtensilsCrossed,
+  Baby,
+  Drum,
   Sparkles,
 };
 
