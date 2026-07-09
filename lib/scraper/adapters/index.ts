@@ -7,6 +7,7 @@ import { toinhaAdapter } from "@/lib/scraper/adapters/toinha";
 import { culturaDfAdapter } from "@/lib/scraper/adapters/cultura-df";
 import { sescDfAdapter } from "@/lib/scraper/adapters/sesc-df";
 import { expressaoBrasilienseAdapter } from "@/lib/scraper/adapters/expressao-brasiliense";
+import { symplaAdapter } from "@/lib/scraper/adapters/sympla";
 
 export const adapters: EventSourceAdapter[] = [
   arenaBrbAdapter,
@@ -17,4 +18,5 @@ export const adapters: EventSourceAdapter[] = [
   culturaDfAdapter,
   sescDfAdapter,
   expressaoBrasilienseAdapter,
+  symplaAdapter,
 ];

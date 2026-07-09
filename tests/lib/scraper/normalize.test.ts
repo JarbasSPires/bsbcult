@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseSlashDate, parseDayMonthWithRollover, parsePtBrDate, endOfDay, slugFromUrl } from "@/lib/scraper/normalize";
+import { parseSlashDate, parseDayMonthWithRollover, parsePtBrDate, isoToSaoPauloDate, endOfDay, slugFromUrl } from "@/lib/scraper/normalize";
 
 describe("parseSlashDate", () => {
   it("parses DD/MM/YY into a Date", () => {
@@ -67,6 +67,26 @@ describe("parsePtBrDate", () => {
 
   it("returns null when no date pattern is present", () => {
     expect(parsePtBrDate("Uma nota sem qualquer data", now)).toBeNull();
+  });
+});
+
+describe("isoToSaoPauloDate", () => {
+  it("reads the Brasília calendar day from an evening UTC instant", () => {
+    // 2026-08-15T23:00Z = 2026-08-15 20:00 in America/Sao_Paulo (UTC-3)
+    const d = isoToSaoPauloDate("2026-08-15T23:00:00.000Z");
+    expect(d!.getFullYear()).toBe(2026);
+    expect(d!.getMonth()).toBe(7);
+    expect(d!.getDate()).toBe(15);
+  });
+
+  it("rolls back to the previous day for an early-UTC instant", () => {
+    // 2026-08-16T02:00Z = 2026-08-15 23:00 in America/Sao_Paulo
+    expect(isoToSaoPauloDate("2026-08-16T02:00:00.000Z")!.getDate()).toBe(15);
+  });
+
+  it("returns null for a missing or unparseable value", () => {
+    expect(isoToSaoPauloDate(undefined)).toBeNull();
+    expect(isoToSaoPauloDate("not-a-date")).toBeNull();
   });
 });
 

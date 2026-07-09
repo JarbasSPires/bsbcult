@@ -66,6 +66,19 @@ export function parsePtBrDate(text: string, now: Date = new Date()): Date | null
   return null;
 }
 
+// Brazil has had no DST since 2019, so America/Sao_Paulo is a fixed UTC-3.
+const SAO_PAULO_OFFSET_MS = 3 * 60 * 60 * 1000;
+
+// Reads the Brasília calendar day (as a local-midnight Date) from a UTC ISO
+// instant, so the day never shifts regardless of the timezone the scraper runs
+// in. Returns null when the value is missing or unparseable.
+export function isoToSaoPauloDate(iso: string | undefined | null): Date | null {
+  const t = iso ? Date.parse(iso) : NaN;
+  if (Number.isNaN(t)) return null;
+  const local = new Date(t - SAO_PAULO_OFFSET_MS);
+  return new Date(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate());
+}
+
 export function endOfDay(date: Date): Date {
   const end = new Date(date);
   end.setHours(23, 59, 0, 0);

@@ -1,5 +1,5 @@
 import type { EventSourceAdapter, NormalizedEvent } from "@/lib/scraper/types";
-import { endOfDay } from "@/lib/scraper/normalize";
+import { endOfDay, isoToSaoPauloDate } from "@/lib/scraper/normalize";
 import { inferCategory } from "@/lib/scraper/infer-category";
 
 // Toinha is a Wix site running the Wix Events app. The /event-list page embeds
@@ -9,8 +9,6 @@ const DETAIL_BASE = "https://www.toinhabrasilshow.com/event-details";
 const FALLBACK_IMAGE = "https://static.wixstatic.com/media/toinha-logo.png";
 const DEFAULT_LOCATION = "Toinha Brasil Show";
 const DEFAULT_ADDRESS = "SOF Sul Quadra 9, Guará, Brasília - DF";
-// Brazil has no DST since 2019, so America/Sao_Paulo is a fixed UTC-3.
-const SAO_PAULO_OFFSET_MS = 3 * 60 * 60 * 1000;
 
 interface WixEvent {
   slug?: string;
@@ -41,15 +39,6 @@ export const toinhaAdapter: EventSourceAdapter = {
     return parseToinhaEvents(await response.text());
   },
 };
-
-// Reads the Brasília calendar day from a UTC ISO instant (evening shows stored
-// as UTC), so the day never shifts regardless of where the scraper runs.
-function saoPauloDate(iso: string | undefined): Date | null {
-  const t = iso ? Date.parse(iso) : NaN;
-  if (Number.isNaN(t)) return null;
-  const local = new Date(t - SAO_PAULO_OFFSET_MS);
-  return new Date(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate());
-}
 
 // Bracket-matches the first `"events":[ ... ]` JSON array that actually holds
 // Wix event objects (slug + title), tolerating the surrounding minified markup.
@@ -112,7 +101,7 @@ function parseEvent(event: WixEvent, now: Date): NormalizedEvent | null {
     const slug = (event.slug ?? "").trim();
     if (!title || !slug) return null;
 
-    const dateStart = saoPauloDate(event.scheduling?.config?.startDate);
+    const dateStart = isoToSaoPauloDate(event.scheduling?.config?.startDate);
     if (!dateStart) return null;
 
     const dateEnd = endOfDay(dateStart);
