@@ -9,6 +9,11 @@ const categories = [
   { name: "Teatro", value: "TEATRO" as const, icon: "Theater", color: "#ec4899", description: "Peças, comédias e espetáculos" },
   { name: "Exposição", value: "EXPOSICAO" as const, icon: "ImageIcon", color: "#10b981", description: "Exposições de arte, fotografia e história" },
   { name: "Cinema", value: "CINEMA" as const, icon: "Film", color: "#0ea5e9", description: "Filmes e mostras de cinema" },
+  { name: "Feira", value: "FEIRA" as const, icon: "Store", color: "#f59e0b", description: "Feiras, mercados e bazares" },
+  { name: "Palestra", value: "PALESTRA" as const, icon: "Mic", color: "#8b5cf6", description: "Palestras, workshops e oficinas" },
+  { name: "Gastronomia", value: "GASTRONOMIA" as const, icon: "UtensilsCrossed", color: "#ef4444", description: "Eventos gastronômicos" },
+  { name: "Infantil", value: "INFANTIL" as const, icon: "Baby", color: "#14b8a6", description: "Programação para crianças e famílias" },
+  { name: "Cultura Popular", value: "CULTURA_POPULAR" as const, icon: "Drum", color: "#a16207", description: "Choro, forró, tradições e cultura popular" },
   { name: "Outro", value: "OUTRO" as const, icon: "Sparkles", color: "#64748b", description: "Outras atrações culturais e de entretenimento" },
 ];
 

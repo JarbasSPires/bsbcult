@@ -38,4 +38,14 @@ describe("EventCard", () => {
     render(<EventCard event={{ ...baseEvent, isFree: false, price: null }} category={category} />);
     expect(screen.getByText("Confira o valor no site oficial")).toBeInTheDocument();
   });
+
+  it("shows an Esgotado badge when the event is sold out", () => {
+    render(<EventCard event={{ ...baseEvent, soldOut: true }} category={category} />);
+    expect(screen.getByText("Esgotado")).toBeInTheDocument();
+  });
+
+  it("does not show an Esgotado badge for available events", () => {
+    render(<EventCard event={baseEvent} category={category} />);
+    expect(screen.queryByText("Esgotado")).not.toBeInTheDocument();
+  });
 });

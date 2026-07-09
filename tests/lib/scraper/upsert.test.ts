@@ -19,6 +19,8 @@ function makeNormalized(overrides: Partial<NormalizedEvent> = {}): NormalizedEve
     organizer: "Organizador Teste",
     tags: ["teste"],
     sourceUrl: "https://example.com/evento",
+    ageRating: null,
+    soldOut: false,
     ...overrides,
   };
 }
@@ -84,6 +86,42 @@ describe("runAdapter", () => {
 
     const events = await prisma.event.findMany({ where: { title: "Show de Teste" } });
     expect(events).toHaveLength(1);
+  });
+
+  it("logs a change when soldOut flips", async () => {
+    await runAdapter(makeAdapter([makeNormalized({ soldOut: false })]));
+    await runAdapter(makeAdapter([makeNormalized({ soldOut: true })]));
+
+    const event = await prisma.event.findFirst({ where: { externalId: "ext-1" } });
+    expect(event?.soldOut).toBe(true);
+    const changes = await prisma.eventChangeLog.findMany({ where: { eventId: event!.id } });
+    expect(changes.some((c) => c.field === "soldOut" && c.newValue === "true")).toBe(true);
+  });
+
+  it("logs a change when ageRating changes", async () => {
+    await runAdapter(makeAdapter([makeNormalized({ ageRating: "12 anos" })]));
+    await runAdapter(makeAdapter([makeNormalized({ ageRating: "18 anos" })]));
+
+    const event = await prisma.event.findFirst({ where: { externalId: "ext-1" } });
+    expect(event?.ageRating).toBe("18 anos");
+    const changes = await prisma.eventChangeLog.findMany({ where: { eventId: event!.id } });
+    expect(changes.some((c) => c.field === "ageRating" && c.newValue === "18 anos")).toBe(true);
+  });
+
+  it("backfills empty price/ageRating on a cross-source match without touching sourceUrl", async () => {
+    await runAdapter(makeAdapter([makeNormalized({ price: null, ageRating: null })], "fonte-a"));
+    await runAdapter(
+      makeAdapter(
+        [makeNormalized({ externalId: "outro-id", sourceUrl: "https://example.com/outro", price: 80, ageRating: "16 anos" })],
+        "fonte-b"
+      )
+    );
+
+    const events = await prisma.event.findMany({ where: { title: "Show de Teste" } });
+    expect(events).toHaveLength(1);
+    expect(events[0].price).toBe(80);
+    expect(events[0].ageRating).toBe("16 anos");
+    expect(events[0].sourceUrl).toBe("https://example.com/evento");
   });
 
   it("records a failed run without throwing", async () => {

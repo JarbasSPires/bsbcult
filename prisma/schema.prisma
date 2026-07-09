@@ -13,6 +13,11 @@ enum EventCategory {
   TEATRO
   EXPOSICAO
   CINEMA
+  FEIRA
+  PALESTRA
+  GASTRONOMIA
+  INFANTIL
+  CULTURA_POPULAR
   OUTRO
 }
 
@@ -43,6 +48,8 @@ model Event {
   tags            String
   featured        Boolean          @default(false)
   status          EventStatus      @default(ATIVO)
+  ageRating       String?
+  soldOut         Boolean          @default(false)
   createdAt       DateTime         @default(now())
   sourceId        String?
   source          EventSource?     @relation(fields: [sourceId], references: [id])

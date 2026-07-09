@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { getEventById, getRelatedEvents } from "@/lib/services/events";
+import { getEventWithSource, getRelatedEvents } from "@/lib/services/events";
 import { listCategories } from "@/lib/services/categories";
 import { categoryMap } from "@/lib/category-icons";
 import { CategoryBadge } from "@/components/events/category-badge";
@@ -13,7 +13,7 @@ import { AddToCalendarButton } from "@/components/events/add-to-calendar-button"
 import { MapPin, Ticket } from "lucide-react";
 
 export default async function EventDetailPage({ params }: { params: { id: string } }) {
-  const event = await getEventById(params.id);
+  const event = await getEventWithSource(params.id);
   if (!event) notFound();
 
   const [categories, related] = await Promise.all([
@@ -33,6 +33,16 @@ export default async function EventDetailPage({ params }: { params: { id: string
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">
           <CategoryBadge category={category} />
+          {event.soldOut && (
+            <span className="rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white">
+              Esgotado
+            </span>
+          )}
+          {event.featured && (
+            <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white">
+              Destaque
+            </span>
+          )}
           <span className="text-sm text-gray-500">{formatEventDate(event.dateStart)}</span>
         </div>
         <h1 className="text-2xl font-bold text-gray-900">{event.title}</h1>
@@ -44,6 +54,24 @@ export default async function EventDetailPage({ params }: { params: { id: string
             <p className="font-medium">{event.locationName}</p>
             <p className="text-sm text-gray-500">{event.locationAddress}</p>
           </div>
+        </div>
+
+        <div className="space-y-1 text-sm text-gray-600">
+          <p>Organização: {event.organizer}</p>
+          {event.ageRating && <p>Classificação: {event.ageRating}</p>}
+          {event.source && (
+            <p>
+              Fonte:{" "}
+              <a
+                href={event.sourceUrl ?? event.source.baseUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                {event.source.name}
+              </a>
+            </p>
+          )}
         </div>
 
         <p className={event.isFree ? "text-lg font-bold text-primary" : "text-lg font-bold text-gray-900"}>
