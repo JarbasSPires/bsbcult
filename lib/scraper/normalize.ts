@@ -30,7 +30,12 @@ const PT_MONTHS: Record<string, number> = {
 const PT_MONTH_DATE = new RegExp(
   `(\\d{1,2})\\s+de\\s+(${Object.keys(PT_MONTHS).join("|")})`,
 );
-const SLASH_DATE = /(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/;
+// A full DD/MM/YY(YY) is a strong date signal — accepted anywhere.
+const SLASH_DATE_WITH_YEAR = /(\d{1,2})\/(\d{1,2})\/(\d{2,4})/;
+// A bare DD/MM is only trusted after a date cue (dia / em / às), so scores,
+// ratios and registration ranges like "de 10/05 a 20/06" are not misread as
+// the event date. (Accent-stripped haystack, so "às" appears as "as".)
+const SLASH_DATE_WITH_CUE = /\b(?:dia|em|as)\s+(\d{1,2})\/(\d{1,2})\b/;
 
 function stripAccents(text: string): string {
   return text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -51,16 +56,23 @@ export function parsePtBrDate(text: string, now: Date = new Date()): Date | null
     if (day >= 1 && day <= 31) return parseDayMonthWithRollover(day, month, now);
   }
 
-  const slashMatch = haystack.match(SLASH_DATE);
-  if (slashMatch) {
-    const day = Number(slashMatch[1]);
-    const month = Number(slashMatch[2]);
-    if (day < 1 || day > 31 || month < 1 || month > 12) return null;
-    if (slashMatch[3]) {
-      const yy = Number(slashMatch[3]);
+  const yearMatch = haystack.match(SLASH_DATE_WITH_YEAR);
+  if (yearMatch) {
+    const day = Number(yearMatch[1]);
+    const month = Number(yearMatch[2]);
+    if (day >= 1 && day <= 31 && month >= 1 && month <= 12) {
+      const yy = Number(yearMatch[3]);
       return new Date(yy < 100 ? 2000 + yy : yy, month - 1, day);
     }
-    return parseDayMonthWithRollover(day, month, now);
+  }
+
+  const cueMatch = haystack.match(SLASH_DATE_WITH_CUE);
+  if (cueMatch) {
+    const day = Number(cueMatch[1]);
+    const month = Number(cueMatch[2]);
+    if (day >= 1 && day <= 31 && month >= 1 && month <= 12) {
+      return parseDayMonthWithRollover(day, month, now);
+    }
   }
 
   return null;

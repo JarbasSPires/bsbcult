@@ -23,10 +23,19 @@ const RULES: [EventCategory, string[]][] = [
   ["SHOW", ["show", "banda", "ao vivo", "turne", "concerto", "dj "]],
 ];
 
+// Keywords match at a WORD START (leading \b), not anywhere: "curso" must not
+// fire on "concurso"/"percurso". Deliberate prefixes still work because there is
+// no trailing boundary — "gastronom" matches "gastronomia", "cine " matches
+// "cine aberto". Compiled once per keyword.
+const RULE_MATCHERS: [EventCategory, RegExp[]][] = RULES.map(([category, keywords]) => [
+  category,
+  keywords.map((k) => new RegExp("\\b" + k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))),
+]);
+
 export function inferCategory(title: string, description: string): EventCategory {
   const haystack = normalize(`${title} ${description}`);
-  for (const [category, keywords] of RULES) {
-    if (keywords.some((k) => haystack.includes(k))) return category;
+  for (const [category, matchers] of RULE_MATCHERS) {
+    if (matchers.some((re) => re.test(haystack))) return category;
   }
   return "OUTRO";
 }

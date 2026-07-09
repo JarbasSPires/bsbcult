@@ -68,6 +68,18 @@ describe("parsePtBrDate", () => {
   it("returns null when no date pattern is present", () => {
     expect(parsePtBrDate("Uma nota sem qualquer data", now)).toBeNull();
   });
+
+  it("ignores a bare DD/MM with no date cue (score, ratio, registration range)", () => {
+    expect(parsePtBrDate("avaliação nota 9/10 no evento", now)).toBeNull();
+    expect(parsePtBrDate("inscrições de 10/05 a 20/06", now)).toBeNull();
+  });
+
+  it("accepts a bare DD/MM only when preceded by a date cue", () => {
+    const date = parsePtBrDate("acontece no dia 20/06 no parque", now);
+    expect(date).not.toBeNull();
+    expect(date!.getMonth()).toBe(5);
+    expect(date!.getDate()).toBe(20);
+  });
 });
 
 describe("isoToSaoPauloDate", () => {

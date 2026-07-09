@@ -20,4 +20,14 @@ describe("inferCategory", () => {
   it("is accent- and case-insensitive", () => {
     expect(inferCategory("FEIRA GASTRONÔMICA", "")).toBe("FEIRA");
   });
+
+  it("matches keywords at word starts, not inside larger words", () => {
+    // "curso" must not match "concurso"/"percurso" (would be PALESTRA)
+    expect(inferCategory("Concurso de Fotografia", "")).toBe("OUTRO");
+    expect(inferCategory("Percurso das Águas", "")).toBe("OUTRO");
+    // but a real "Curso" still classifies as PALESTRA
+    expect(inferCategory("Curso de Fotografia", "")).toBe("PALESTRA");
+    // prefix keywords (gastronom*) keep working
+    expect(inferCategory("Festival Gastronômico", "")).toBe("GASTRONOMIA");
+  });
 });
