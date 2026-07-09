@@ -1,0 +1,40 @@
+[
+  {
+    "id": 4515971,
+    "titulo": "Brinca+",
+    "subtitulo": "",
+    "categoria": {
+      "key": "especial",
+      "name": "ESPECIAL"
+    },
+    "dataDeInicio": "2026-07-05T00:00:00.000Z",
+    "dataFinal": "2026-08-02T00:00:00.000Z",
+    "horarioInicial": "9h/10h",
+    "horarioFinal": "18h/19h",
+    "local": "",
+    "classificacaoEtaria": {
+      "key": "livre",
+      "name": "Livre"
+    },
+    "descricaoRawText": "O Festival Brinca+ é o nosso festival de férias e acontece sempre em janeiro e julho, trazendo uma programação intensa para o público infanto-juvenil, com shows, apresentações teatrais e uma série de oficinas com educadores, artistas, designers e cientistas. Aqui, criação, experimentação, criatividade e brincadeira são os grandes motores da aprendizagem!  A 7ª edição a ser realizada entre 05 de julho e 02 de agosto, assinada pela SHELL, reúne diferentes programações especiais do SESI Lab. Durante os fins de semana (sexta a domingo), nossos mestres de cerimônia palhaços vão garantir momentos de alegria e interação com o público! Nesse período, o museu contará ainda com uma exposição que celebra as oito décadas do Serviço Social da Indústria (SESI) e do Conselho Nacional do SESI (CN-SESI). É composta por três módulos localizados no primeiro pavimento do SESI Lab: átrio, sala de exposições temporárias e sala CN-SESI. Acessibilidade  O SESI Lab possui piso podotátil no entorno do edifício e em diversas áreas internas, acessos adaptados para cadeirantes, maquetes táteis e plantas elevadas. Oferecemos legendas e textos em Braille e caracteres ampliados em alguns aparatos, além de audiodescrição e videolibras via QR Code.  A entrada é gratuita, com emissão de ingressos pelo site. A entrada no museu não garante vagas nas oficinas, que exigem a retirada de ingressos específicos na bilheteria física ou digital. Locais: - Praça externa: espaço amplo com praça de alimentação (foodtrucks).  - Praça da Árvore: estrutura de palco para apresentações teatrais e musicais.  - Estação Descoberta (Galeria Fenômenos do Mundo – Norte) e área externa: local das ativações do festival.  - Hall de Entrada: espaço de oficinas do Educativo SESI Lab.  - Espaço Maker e Biomaker: espaços destinados às oficinas. Horário de funcionamento: Segunda a sexta: 9h às 18h Sábados, domingos e feriados: 10h às 19h"
+  },
+  {
+    "id": 1317813,
+    "titulo": "Cores e corais",
+    "subtitulo": "",
+    "categoria": {
+      "key": "ativao",
+      "name": "ATIVAÇÃO"
+    },
+    "dataDeInicio": "2025-04-09T00:00:00.000Z",
+    "dataFinal": "2025-04-09T00:00:00.000Z",
+    "horarioInicial": "09:00",
+    "horarioFinal": "11:30",
+    "local": "<p>Estação Descoberta</p>",
+    "classificacaoEtaria": {
+      "key": "livre",
+      "name": "Livre"
+    },
+    "descricaoRawText": ""
+  }
+]
