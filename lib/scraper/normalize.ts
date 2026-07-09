@@ -12,6 +12,60 @@ export function parseDayMonthWithRollover(day: number, month: number, now: Date 
   return candidate < cutoff ? new Date(now.getFullYear() + 1, month - 1, day) : candidate;
 }
 
+const PT_MONTHS: Record<string, number> = {
+  janeiro: 1,
+  fevereiro: 2,
+  marco: 3,
+  abril: 4,
+  maio: 5,
+  junho: 6,
+  julho: 7,
+  agosto: 8,
+  setembro: 9,
+  outubro: 10,
+  novembro: 11,
+  dezembro: 12,
+};
+
+const PT_MONTH_DATE = new RegExp(
+  `(\\d{1,2})\\s+de\\s+(${Object.keys(PT_MONTHS).join("|")})`,
+);
+const SLASH_DATE = /(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/;
+
+function stripAccents(text: string): string {
+  return text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
+// Extracts the first "DD de <mês>" or "DD/MM[/YY]" date from free-form pt-BR
+// text and returns it as a Date. "DD de <mês>" and bare "DD/MM" use next-year
+// rollover for long-past dates (via parseDayMonthWithRollover); an explicit
+// "DD/MM/YY(YY)" year is honored as-is. Returns null when no date is present
+// (e.g. an undated news post), so callers can skip such items.
+export function parsePtBrDate(text: string, now: Date = new Date()): Date | null {
+  const haystack = stripAccents(text);
+
+  const monthMatch = haystack.match(PT_MONTH_DATE);
+  if (monthMatch) {
+    const day = Number(monthMatch[1]);
+    const month = PT_MONTHS[monthMatch[2]];
+    if (day >= 1 && day <= 31) return parseDayMonthWithRollover(day, month, now);
+  }
+
+  const slashMatch = haystack.match(SLASH_DATE);
+  if (slashMatch) {
+    const day = Number(slashMatch[1]);
+    const month = Number(slashMatch[2]);
+    if (day < 1 || day > 31 || month < 1 || month > 12) return null;
+    if (slashMatch[3]) {
+      const yy = Number(slashMatch[3]);
+      return new Date(yy < 100 ? 2000 + yy : yy, month - 1, day);
+    }
+    return parseDayMonthWithRollover(day, month, now);
+  }
+
+  return null;
+}
+
 export function endOfDay(date: Date): Date {
   const end = new Date(date);
   end.setHours(23, 59, 0, 0);
