@@ -48,6 +48,10 @@ export async function getEventById(id: string): Promise<Event | null> {
   return prisma.event.findUnique({ where: { id } });
 }
 
+export async function getEventWithSource(id: string) {
+  return prisma.event.findUnique({ where: { id }, include: { source: true } });
+}
+
 export async function getRelatedEvents(event: {
   id: string;
   category: EventCategory;

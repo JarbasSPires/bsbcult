@@ -14,6 +14,7 @@ interface EventCardEvent {
   dateStart: Date;
   price: number | null;
   isFree: boolean;
+  soldOut?: boolean;
 }
 
 export function EventCard({
@@ -31,6 +32,11 @@ export function EventCard({
           <div className="absolute left-3 top-3">
             <CategoryBadge category={category} />
           </div>
+          {event.soldOut && (
+            <span className="absolute right-3 top-3 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white">
+              Esgotado
+            </span>
+          )}
         </div>
         <div className="space-y-2 p-4">
           <h3 className="line-clamp-1 font-semibold text-gray-900">{event.title}</h3>
