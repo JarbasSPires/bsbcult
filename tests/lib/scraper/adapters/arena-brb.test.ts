@@ -13,13 +13,16 @@ describe("parseAgendaHtml", () => {
       externalId: "tour-nosso-mane",
       title: "Tour - Nosso Mané",
       locationName: "Arena BRB Mané Garrincha",
-      category: "OUTRO",
+      // "Show em comemoração..." → inferCategory matches "show"
+      category: "SHOW",
       sourceUrl: "https://arenabsb.com.br/agendas/tour-nosso-mane/",
     });
     expect(events[0].dateStart.getFullYear()).toBe(2026);
     expect(events[0].dateStart.getMonth()).toBe(2);
     expect(events[0].dateStart.getDate()).toBe(8);
     expect(events[1].externalId).toBe("real-circo-brasilia");
+    // "Real Circo" + "Espetáculo circense..." → inferCategory matches "circo"
+    expect(events[1].category).toBe("INFANTIL");
   });
 
   it("skips an item with a malformed date instead of throwing or discarding the batch", () => {

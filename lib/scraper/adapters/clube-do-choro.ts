@@ -1,6 +1,7 @@
 import he from "he";
 import type { EventSourceAdapter, NormalizedEvent } from "@/lib/scraper/types";
 import { parseDayMonthWithRollover, endOfDay } from "@/lib/scraper/normalize";
+import { inferCategory } from "@/lib/scraper/infer-category";
 
 const CATEGORY_ID = 27;
 const API_URL = `https://clubedochoro.com.br/wp-json/wp/v2/posts?categories=${CATEGORY_ID}&per_page=50&_embed=wp:featuredmedia`;
@@ -52,11 +53,15 @@ function parsePost(post: WordPressPost): NormalizedEvent | null {
       .replace(/<[^>]+>/g, "")
       .trim();
 
+    // Venue default is SHOW when keyword inference is inconclusive (music venue).
+    const inferred = inferCategory(eventTitle, decodedExcerpt);
+    const category = inferred === "OUTRO" ? "SHOW" : inferred;
+
     return {
       externalId: String(post.id),
       title: eventTitle.trim(),
       description: decodedExcerpt || FALLBACK_DESCRIPTION,
-      category: "SHOW",
+      category,
       imageUrl: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url ?? FALLBACK_IMAGE,
       locationName: "Clube do Choro",
       locationAddress: "SCES Trecho 2, Conjunto 39 - Asa Sul, Brasília - DF",

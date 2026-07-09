@@ -1,6 +1,7 @@
 import * as cheerio from "cheerio";
 import type { EventSourceAdapter, NormalizedEvent } from "@/lib/scraper/types";
 import { parseSlashDate, endOfDay, slugFromUrl } from "@/lib/scraper/normalize";
+import { inferCategory } from "@/lib/scraper/infer-category";
 
 const AGENDA_URL = "https://arenabsb.com.br/agenda/";
 const FALLBACK_IMAGE = "https://arenabsb.com.br/wp-content/uploads/2023/05/logo-header-arena-brb.svg";
@@ -47,7 +48,7 @@ export function parseAgendaHtml(html: string): NormalizedEvent[] {
         externalId: slugFromUrl(detailUrl),
         title,
         description: description || FALLBACK_DESCRIPTION,
-        category: "OUTRO",
+        category: inferCategory(title, description),
         imageUrl: imageUrl ?? FALLBACK_IMAGE,
         locationName: locationName || DEFAULT_LOCATION,
         locationAddress: DEFAULT_ADDRESS,
