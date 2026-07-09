@@ -8,6 +8,7 @@ import { culturaDfAdapter } from "@/lib/scraper/adapters/cultura-df";
 import { sescDfAdapter } from "@/lib/scraper/adapters/sesc-df";
 import { expressaoBrasilienseAdapter } from "@/lib/scraper/adapters/expressao-brasiliense";
 import { symplaAdapter } from "@/lib/scraper/adapters/sympla";
+import { shotgunAdapter } from "@/lib/scraper/adapters/shotgun";
 
 export const adapters: EventSourceAdapter[] = [
   arenaBrbAdapter,
@@ -19,4 +20,5 @@ export const adapters: EventSourceAdapter[] = [
   sescDfAdapter,
   expressaoBrasilienseAdapter,
   symplaAdapter,
+  shotgunAdapter,
 ];
