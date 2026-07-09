@@ -3,6 +3,7 @@ import { arenaBrbAdapter } from "@/lib/scraper/adapters/arena-brb";
 import { clubeDoChoroAdapter } from "@/lib/scraper/adapters/clube-do-choro";
 import { sesiLabAdapter } from "@/lib/scraper/adapters/sesi-lab";
 import { caixaCulturalAdapter } from "@/lib/scraper/adapters/caixa-cultural";
+import { toinhaAdapter } from "@/lib/scraper/adapters/toinha";
 import { culturaDfAdapter } from "@/lib/scraper/adapters/cultura-df";
 import { sescDfAdapter } from "@/lib/scraper/adapters/sesc-df";
 import { expressaoBrasilienseAdapter } from "@/lib/scraper/adapters/expressao-brasiliense";
@@ -12,6 +13,7 @@ export const adapters: EventSourceAdapter[] = [
   clubeDoChoroAdapter,
   sesiLabAdapter,
   caixaCulturalAdapter,
+  toinhaAdapter,
   culturaDfAdapter,
   sescDfAdapter,
   expressaoBrasilienseAdapter,
