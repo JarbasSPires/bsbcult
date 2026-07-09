@@ -98,6 +98,16 @@ describe("runAdapter", () => {
     expect(changes.some((c) => c.field === "soldOut" && c.newValue === "true")).toBe(true);
   });
 
+  it("logs a change when ageRating changes", async () => {
+    await runAdapter(makeAdapter([makeNormalized({ ageRating: "12 anos" })]));
+    await runAdapter(makeAdapter([makeNormalized({ ageRating: "18 anos" })]));
+
+    const event = await prisma.event.findFirst({ where: { externalId: "ext-1" } });
+    expect(event?.ageRating).toBe("18 anos");
+    const changes = await prisma.eventChangeLog.findMany({ where: { eventId: event!.id } });
+    expect(changes.some((c) => c.field === "ageRating" && c.newValue === "18 anos")).toBe(true);
+  });
+
   it("backfills empty price/ageRating on a cross-source match without touching sourceUrl", async () => {
     await runAdapter(makeAdapter([makeNormalized({ price: null, ageRating: null })], "fonte-a"));
     await runAdapter(

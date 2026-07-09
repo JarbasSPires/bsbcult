@@ -113,7 +113,9 @@ async function upsertNormalizedEvent(sourceId: string, normalized: NormalizedEve
   });
   const duplicate = findCrossSourceDuplicate(normalized, sameDayEvents);
   if (duplicate) {
-    const existing = await prisma.event.findUnique({ where: { id: duplicate.id } });
+    // `sameDayEvents` are full Event rows already in memory — reuse the matched
+    // one to backfill instead of issuing another query.
+    const existing = sameDayEvents.find((event) => event.id === duplicate.id);
     await prisma.event.update({
       where: { id: duplicate.id },
       data: {
@@ -191,6 +193,9 @@ async function applyUpdate(
   }
   if (existing.status !== "ATIVO") {
     changes.push({ field: "status", oldValue: existing.status, newValue: "ATIVO" });
+  }
+  if (existing.ageRating !== normalized.ageRating) {
+    changes.push({ field: "ageRating", oldValue: existing.ageRating, newValue: normalized.ageRating });
   }
   if (existing.soldOut !== normalized.soldOut) {
     changes.push({
