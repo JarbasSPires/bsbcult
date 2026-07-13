@@ -158,15 +158,20 @@ describe("upcoming filtering", () => {
 });
 
 describe("getUpcomingHighlights", () => {
-  it("returns upcoming events only from the given source slugs", async () => {
+  it("returns every upcoming this-year event from the given sources, excluding other sources, past, and next-year events", async () => {
     const sympla = await makeSource("sympla");
     const arena = await makeSource("arena-brb");
-    await makeEvent({ title: "Do Sympla", sourceId: sympla.id, ...future });
-    await makeEvent({ title: "Da Arena", sourceId: arena.id, ...future });
+    const nextYear = new Date().getFullYear() + 1;
+    // near-now, unambiguously within the current year (avoids year-boundary flakiness)
+    await makeEvent({ title: "Sympla A", sourceId: sympla.id, dateStart: new Date(Date.now() + 36e5), dateEnd: new Date(Date.now() + 72e5) });
+    await makeEvent({ title: "Sympla B", sourceId: sympla.id, dateStart: new Date(Date.now() + 2 * 36e5), dateEnd: new Date(Date.now() + 3 * 36e5) });
+    await makeEvent({ title: "Da Arena", sourceId: arena.id, dateStart: new Date(Date.now() + 36e5), dateEnd: new Date(Date.now() + 72e5) });
     await makeEvent({ title: "Sympla passado", sourceId: sympla.id, ...past });
+    await makeEvent({ title: "Sympla ano que vem", sourceId: sympla.id, dateStart: new Date(nextYear, 5, 1), dateEnd: new Date(nextYear, 5, 1, 23) });
 
     const result = await getUpcomingHighlights(["sympla", "shotgun"]);
-    expect(result.map((e) => e.title)).toEqual(["Do Sympla"]);
+    // all matching (no take limit), ordered by dateStart, only this-year sympla/shotgun
+    expect(result.map((e) => e.title)).toEqual(["Sympla A", "Sympla B"]);
   });
 });
 

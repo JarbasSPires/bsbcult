@@ -38,9 +38,11 @@ export default async function HomePage() {
         {highlights.length === 0 ? (
           <EmptyState title="Nenhum destaque no momento" />
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="-mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-2">
             {highlights.map((event) => (
-              <EventCard key={event.id} event={event} category={categoriesByValue[event.category]} />
+              <div key={event.id} className="w-72 shrink-0 snap-start">
+                <EventCard event={event} category={categoriesByValue[event.category]} />
+              </div>
             ))}
           </div>
         )}
