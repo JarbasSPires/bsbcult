@@ -5,6 +5,10 @@ import { CategoryScroller } from "@/components/events/category-scroller";
 import { EventCard } from "@/components/events/event-card";
 import { EmptyState } from "@/components/shared/empty-state";
 
+// Regenerate at most every 30 min so newly-scraped events (and the "upcoming"
+// date filter, which depends on the current time) stay fresh without a redeploy.
+export const revalidate = 1800;
+
 // Events from these sources power the "Destaques" section; everything else is
 // grouped into per-category sections below.
 const HIGHLIGHT_SOURCES = ["shotgun", "sympla"];
