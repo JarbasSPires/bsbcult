@@ -9,6 +9,8 @@ export interface EventFilters {
   dateFrom?: Date;
   dateTo?: Date;
   sourceId?: string;
+  /** When true, only events that have not ended yet (dateEnd >= now) are returned. */
+  upcoming?: boolean;
 }
 
 export async function listEvents(filters: EventFilters = {}): Promise<Event[]> {
@@ -24,6 +26,7 @@ export async function listEvents(filters: EventFilters = {}): Promise<Event[]> {
   if (filters.category) where.category = filters.category;
   if (filters.isFree !== undefined) where.isFree = filters.isFree;
   if (filters.status) where.status = filters.status;
+  if (filters.upcoming) where.dateEnd = { gte: new Date() };
   if (filters.sourceId === "MANUAL") where.sourceId = null;
   else if (filters.sourceId) where.sourceId = filters.sourceId;
   if (filters.dateFrom || filters.dateTo) {
@@ -38,9 +41,36 @@ export async function listEvents(filters: EventFilters = {}): Promise<Event[]> {
 
 export async function getFeaturedEvents(): Promise<Event[]> {
   return prisma.event.findMany({
-    where: { featured: true, status: "ATIVO" },
+    where: { featured: true, status: "ATIVO", dateEnd: { gte: new Date() } },
     orderBy: { dateStart: "asc" },
     take: 10,
+  });
+}
+
+// Upcoming events whose source is one of `sourceSlugs` — used for the home
+// "Destaques" (Infinu/Shotgun + Sympla).
+export async function getUpcomingHighlights(sourceSlugs: string[]): Promise<Event[]> {
+  return prisma.event.findMany({
+    where: {
+      status: "ATIVO",
+      dateEnd: { gte: new Date() },
+      source: { slug: { in: sourceSlugs } },
+    },
+    orderBy: { dateStart: "asc" },
+    take: 12,
+  });
+}
+
+// Upcoming events that are NOT from `sourceSlugs` (including manually-created
+// events, which have no source) — the home groups these by category.
+export async function getUpcomingEventsExcludingSources(sourceSlugs: string[]): Promise<Event[]> {
+  return prisma.event.findMany({
+    where: {
+      status: "ATIVO",
+      dateEnd: { gte: new Date() },
+      NOT: { source: { slug: { in: sourceSlugs } } },
+    },
+    orderBy: { dateStart: "asc" },
   });
 }
 
@@ -61,6 +91,7 @@ export async function getRelatedEvents(event: {
       category: event.category,
       id: { not: event.id },
       status: "ATIVO",
+      dateEnd: { gte: new Date() },
     },
     take: 4,
     orderBy: { dateStart: "asc" },

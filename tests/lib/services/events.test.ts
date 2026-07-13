@@ -5,7 +5,19 @@ import {
   getFeaturedEvents,
   getEventById,
   getRelatedEvents,
+  getUpcomingHighlights,
+  getUpcomingEventsExcludingSources,
 } from "@/lib/services/events";
+
+const DAY = 24 * 60 * 60 * 1000;
+const past = { dateStart: new Date(Date.now() - 3 * DAY), dateEnd: new Date(Date.now() - 2 * DAY) };
+const future = { dateStart: new Date(Date.now() + 2 * DAY), dateEnd: new Date(Date.now() + 3 * DAY) };
+
+async function makeSource(slug: string) {
+  return prisma.eventSource.create({
+    data: { name: slug, slug, baseUrl: `https://${slug}.example.com`, adapterType: "HTML" },
+  });
+}
 
 async function makeEvent(overrides: Partial<Parameters<typeof prisma.event.create>[0]["data"]> = {}) {
   return prisma.event.create({
@@ -115,11 +127,57 @@ describe("getEventById", () => {
 describe("getRelatedEvents", () => {
   it("returns active events in the same category, excluding itself", async () => {
     const main = await makeEvent({ category: "SHOW" });
-    const related = await makeEvent({ title: "Outro Show", category: "SHOW" });
+    const related = await makeEvent({ title: "Outro Show", category: "SHOW", ...future });
     await makeEvent({ title: "Show Encerrado", category: "SHOW", status: "ENCERRADO" });
     await makeEvent({ title: "Teatro", category: "TEATRO" });
 
     const result = await getRelatedEvents(main);
     expect(result.map((e) => e.id)).toEqual([related.id]);
+  });
+});
+
+describe("upcoming filtering", () => {
+  it("hides events that have already ended when upcoming is set", async () => {
+    await makeEvent({ title: "Passado", ...past });
+    await makeEvent({ title: "Futuro", ...future });
+
+    const result = await listEvents({ upcoming: true });
+    expect(result.map((e) => e.title)).toEqual(["Futuro"]);
+  });
+
+  it("keeps an ongoing multi-day event whose end is still in the future", async () => {
+    await makeEvent({
+      title: "Em curso",
+      dateStart: new Date(Date.now() - DAY),
+      dateEnd: new Date(Date.now() + DAY),
+    });
+
+    const result = await listEvents({ upcoming: true });
+    expect(result.map((e) => e.title)).toEqual(["Em curso"]);
+  });
+});
+
+describe("getUpcomingHighlights", () => {
+  it("returns upcoming events only from the given source slugs", async () => {
+    const sympla = await makeSource("sympla");
+    const arena = await makeSource("arena-brb");
+    await makeEvent({ title: "Do Sympla", sourceId: sympla.id, ...future });
+    await makeEvent({ title: "Da Arena", sourceId: arena.id, ...future });
+    await makeEvent({ title: "Sympla passado", sourceId: sympla.id, ...past });
+
+    const result = await getUpcomingHighlights(["sympla", "shotgun"]);
+    expect(result.map((e) => e.title)).toEqual(["Do Sympla"]);
+  });
+});
+
+describe("getUpcomingEventsExcludingSources", () => {
+  it("returns upcoming events except those from the given sources, including manual ones", async () => {
+    const sympla = await makeSource("sympla");
+    await makeEvent({ title: "Do Sympla", sourceId: sympla.id, ...future });
+    await makeEvent({ title: "Manual", ...future });
+    await makeEvent({ title: "Manual passado", ...past });
+
+    const result = await getUpcomingEventsExcludingSources(["sympla", "shotgun"]);
+    expect(result.map((e) => e.title)).toEqual(["Manual"]);
   });
 });

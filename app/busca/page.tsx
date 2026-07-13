@@ -19,6 +19,7 @@ export default async function SearchPage({
     isFree: searchParams.isFree === undefined ? undefined : searchParams.isFree === "true",
     sourceId: searchParams.sourceId || undefined,
     status: "ATIVO",
+    upcoming: true,
   });
   const categoriesByValue = categoryMap(categories);
 
