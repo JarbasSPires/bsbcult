@@ -48,16 +48,19 @@ export async function getFeaturedEvents(): Promise<Event[]> {
 }
 
 // Upcoming events whose source is one of `sourceSlugs` — used for the home
-// "Destaques" (Infinu/Shotgun + Sympla).
+// "Destaques" (Infinu/Shotgun + Sympla). Returns every such event from now
+// through the end of the current year (no cap), for the side-scrolling row.
 export async function getUpcomingHighlights(sourceSlugs: string[]): Promise<Event[]> {
+  const now = new Date();
+  const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
   return prisma.event.findMany({
     where: {
       status: "ATIVO",
-      dateEnd: { gte: new Date() },
+      dateEnd: { gte: now },
+      dateStart: { lte: endOfYear },
       source: { slug: { in: sourceSlugs } },
     },
     orderBy: { dateStart: "asc" },
-    take: 12,
   });
 }
 
