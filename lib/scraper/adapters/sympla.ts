@@ -1,10 +1,14 @@
 import type { EventSourceAdapter, NormalizedEvent } from "@/lib/scraper/types";
 import { endOfDay, isoToSaoPauloDate } from "@/lib/scraper/normalize";
 import { inferCategory } from "@/lib/scraper/infer-category";
+import { fetchHtmlViaCurl } from "@/lib/scraper/curl-fetch";
 
 // Sympla's Brasília listing is a Next.js App Router page: the event objects are
 // embedded (JSON-string-escaped) inside the RSC flight payload (self.__next_f).
-const LIST_URL = "https://www.sympla.com.br/eventos/brasilia-df";
+// `category=city` is Sympla's "eventos na cidade" tab (all local events, as
+// opposed to a specific category like courses/shows) and is fetched via curl
+// (see curl-fetch.ts) for the same anti-bot resilience as the Shotgun adapter.
+const LIST_URL = "https://www.sympla.com.br/eventos/brasilia-df?category=city";
 const FALLBACK_IMAGE = "https://www.sympla.com.br/favicon.ico";
 
 interface SymplaLocation {
@@ -32,17 +36,8 @@ export const symplaAdapter: EventSourceAdapter = {
   adapterType: "HTML",
 
   async fetchEvents(): Promise<NormalizedEvent[]> {
-    const response = await fetch(LIST_URL, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-        "Accept-Language": "pt-BR,pt;q=0.9",
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`Sympla respondeu ${response.status}`);
-    }
-    return parseSymplaEvents(await response.text());
+    const html = await fetchHtmlViaCurl(LIST_URL, "Sympla");
+    return parseSymplaEvents(html);
   },
 };
 
