@@ -1,21 +1,15 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import type { EventSourceAdapter, NormalizedEvent } from "@/lib/scraper/types";
 import { endOfDay, isoToSaoPauloDate } from "@/lib/scraper/normalize";
 import { inferCategory } from "@/lib/scraper/infer-category";
-
-const execFileAsync = promisify(execFile);
+import { fetchHtmlViaCurl } from "@/lib/scraper/curl-fetch";
 
 // Shotgun (Next.js) renders the Infinu venue's event cards into the SSR HTML.
 // Each card is anchored by an <a href="/pt-br/events/<slug>"> and carries an
 // <img alt="title">, a <time dateTime="<ISO>">, a "R$ x,yz" price and genre tags.
 //
-// Shotgun's anti-bot (Cloudflare) fingerprints the HTTP client: Node's fetch is
-// blocked with 429, but a plain curl with browser headers gets 200 from the same
-// IP. So we fetch through curl (present on the CI runner and locally). A genuine
-// block (403/429) still throws a descriptive error, isolated by runAdapter.
+// Fetched via curl (see curl-fetch.ts) rather than fetch — Shotgun's anti-bot
+// blocks Node's fetch with 429 but allows curl from the same IP/network.
 const VENUE_URL = "https://shotgun.live/pt-br/venues/infinu-comunidade-criativa";
-const STATUS_MARKER = "\n__HTTP_STATUS__";
 const EVENT_BASE = "https://shotgun.live/pt-br/events";
 const FALLBACK_IMAGE = "https://shotgun.live/favicon.ico";
 const VENUE_NAME = "Infinu Comunidade Criativa";
@@ -28,50 +22,7 @@ export const shotgunAdapter: EventSourceAdapter = {
   adapterType: "HTML",
 
   async fetchEvents(): Promise<NormalizedEvent[]> {
-    let stdout: string;
-    try {
-      ({ stdout } = await execFileAsync(
-        "curl",
-        [
-          "-s",
-          "-L",
-          "--compressed",
-          "--max-time",
-          "40",
-          "-A",
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-          "-H",
-          "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-          "-H",
-          "Accept-Language: pt-BR,pt;q=0.9,en;q=0.8",
-          "-H",
-          "Sec-Fetch-Dest: document",
-          "-H",
-          "Sec-Fetch-Mode: navigate",
-          "-H",
-          "Sec-Fetch-Site: none",
-          "-H",
-          "Upgrade-Insecure-Requests: 1",
-          "-w",
-          `${STATUS_MARKER}%{http_code}`,
-          VENUE_URL,
-        ],
-        { maxBuffer: 25 * 1024 * 1024 },
-      ));
-    } catch (error) {
-      throw new Error(`Shotgun: falha ao executar curl (${error instanceof Error ? error.message : String(error)})`);
-    }
-
-    const markerAt = stdout.lastIndexOf(STATUS_MARKER);
-    const status = markerAt >= 0 ? stdout.slice(markerAt + STATUS_MARKER.length).trim() : "";
-    const html = markerAt >= 0 ? stdout.slice(0, markerAt) : stdout;
-
-    if (status === "403" || status === "429") {
-      throw new Error(`Shotgun bloqueou a requisição (HTTP ${status}) — fonte requer navegador real`);
-    }
-    if (!/^2\d\d$/.test(status)) {
-      throw new Error(`Shotgun respondeu ${status || "sem status"}`);
-    }
+    const html = await fetchHtmlViaCurl(VENUE_URL, "Shotgun");
     return parseShotgunEvents(html);
   },
 };
