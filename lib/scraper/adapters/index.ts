@@ -7,6 +7,8 @@ import { toinhaAdapter } from "@/lib/scraper/adapters/toinha";
 import { culturaDfAdapter } from "@/lib/scraper/adapters/cultura-df";
 import { sescDfAdapter } from "@/lib/scraper/adapters/sesc-df";
 import { expressaoBrasilienseAdapter } from "@/lib/scraper/adapters/expressao-brasiliense";
+import { roteiroBabyAdapter } from "@/lib/scraper/adapters/roteiro-baby";
+import { deboaAdapter } from "@/lib/scraper/adapters/deboa";
 import { symplaAdapter } from "@/lib/scraper/adapters/sympla";
 import { shotgunAdapter } from "@/lib/scraper/adapters/shotgun";
 
@@ -19,6 +21,8 @@ export const adapters: EventSourceAdapter[] = [
   culturaDfAdapter,
   sescDfAdapter,
   expressaoBrasilienseAdapter,
+  roteiroBabyAdapter,
+  deboaAdapter,
   symplaAdapter,
   shotgunAdapter,
 ];
