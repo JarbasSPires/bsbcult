@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { parseSlashDate, parseDayMonthWithRollover, parsePtBrDate, isoToSaoPauloDate, endOfDay, slugFromUrl } from "@/lib/scraper/normalize";
+import {
+  parseSlashDate,
+  parseDayMonthWithRollover,
+  parsePtBrDate,
+  extractPtBrDateRange,
+  isoToSaoPauloDate,
+  endOfDay,
+  slugFromUrl,
+} from "@/lib/scraper/normalize";
 
 describe("parseSlashDate", () => {
   it("parses DD/MM/YY into a Date", () => {
@@ -99,6 +107,80 @@ describe("isoToSaoPauloDate", () => {
   it("returns null for a missing or unparseable value", () => {
     expect(isoToSaoPauloDate(undefined)).toBeNull();
     expect(isoToSaoPauloDate("not-a-date")).toBeNull();
+  });
+});
+
+describe("extractPtBrDateRange", () => {
+  const now = new Date("2026-07-20T00:00:00");
+
+  it("parses a single date with an explicit year", () => {
+    const range = extractPtBrDateRange("Data: 30 de julho de 2026, quinta-feira", now)!;
+    expect(range.start.getMonth()).toBe(6);
+    expect(range.start.getDate()).toBe(30);
+    expect(range.end.getMonth()).toBe(6);
+    expect(range.end.getDate()).toBe(30);
+  });
+
+  it("parses a same-month range joined by 'a'", () => {
+    const range = extractPtBrDateRange("30 de julho a 2 de agosto de 2026, quinta a domingo", now)!;
+    expect([range.start.getMonth(), range.start.getDate()]).toEqual([6, 30]);
+    expect([range.end.getMonth(), range.end.getDate()]).toEqual([7, 2]);
+  });
+
+  it("parses a range joined by 'e' (not just 'a')", () => {
+    const range = extractPtBrDateRange("25 e 26 de julho de 2026, sábado e domingo", now)!;
+    expect(range.start.getDate()).toBe(25);
+    expect(range.end.getDate()).toBe(26);
+  });
+
+  it("normalizes ordinal day markers (1°, 1º)", () => {
+    const range = extractPtBrDateRange("31 de julho e 1° de agosto de 2026", now)!;
+    expect([range.start.getMonth(), range.start.getDate()]).toEqual([6, 31]);
+    expect([range.end.getMonth(), range.end.getDate()]).toEqual([7, 1]);
+  });
+
+  it("resolves each side of a year-boundary range to its own year", () => {
+    const range = extractPtBrDateRange("De 27 de Dezembro de 2026 a 03 de Janeiro de 2027", now)!;
+    expect(range.start.getFullYear()).toBe(2026);
+    expect(range.start.getMonth()).toBe(11);
+    expect(range.start.getDate()).toBe(27);
+    expect(range.end.getFullYear()).toBe(2027);
+    expect(range.end.getMonth()).toBe(0);
+    expect(range.end.getDate()).toBe(3);
+  });
+
+  it("infers the current year when no year is present and the date is upcoming", () => {
+    // "now" is July 2026; "8 a 10 de agosto" (no year) is a few weeks out —
+    // stays in the current year (no rollover needed).
+    const range = extractPtBrDateRange("Agenda infantil de Brasília para 8 a 10 de agosto", now)!;
+    expect(range.start.getFullYear()).toBe(now.getFullYear());
+    expect(range.start.getMonth()).toBe(7);
+    expect(range.start.getDate()).toBe(8);
+    expect(range.end.getDate()).toBe(10);
+  });
+
+  it("rolls a yearless date more than 30 days in the past into next year", () => {
+    // Matches parseDayMonthWithRollover's existing 30-day-past threshold —
+    // consistent with how the rest of the scraper infers missing years.
+    const range = extractPtBrDateRange("Agenda infantil de Brasília para 10 a 12 de junho", now)!;
+    expect(range.start.getFullYear()).toBe(now.getFullYear() + 1);
+  });
+
+  it("returns null when there is no day-month pattern", () => {
+    expect(extractPtBrDateRange("Sem nenhuma data aqui", now)).toBeNull();
+  });
+
+  it("with rollover disabled, keeps a yearless past date in the current year instead of bumping to next year", () => {
+    // Same input as the rollover test above, but a source whose "now" is
+    // already stale (e.g. a roundup post the site hasn't refreshed) should
+    // resolve to a genuinely past date — which the app's own upcoming-events
+    // filter then correctly excludes — rather than a fabricated future one.
+    const range = extractPtBrDateRange("Agenda infantil de Brasília para 10 a 12 de junho", now, {
+      rollover: false,
+    })!;
+    expect(range.start.getFullYear()).toBe(now.getFullYear());
+    expect(range.start.getMonth()).toBe(5);
+    expect(range.start.getDate()).toBe(10);
   });
 });
 

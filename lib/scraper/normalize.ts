@@ -78,6 +78,91 @@ export function parsePtBrDate(text: string, now: Date = new Date()): Date | null
   return null;
 }
 
+export interface DateRange {
+  start: Date;
+  end: Date;
+}
+
+const MONTH_NAMES = Object.keys(PT_MONTHS).join("|");
+// Tried as one alternation per match position so a shared-month pair ("25 e 26
+// de julho") is captured as two day tokens for a single month, while a
+// different-months pair ("30 de julho a 2 de agosto") falls through to two
+// independent single-day matches instead (the "dual" branch only fires when
+// no "de <mês>" sits between the two day numbers).
+// Day tokens are boundary-guarded ((?<!\d)/(?!\d)) so a 1-2 digit match can
+// never be a substring of a longer run of digits — otherwise "26" inside the
+// year "2026" would itself be misread as a day number.
+const DAY_MONTH_RE = new RegExp(
+  `(?:(?<!\\d)(?<d1>\\d{1,2})(?!\\d)\\s*(?:a|e)\\s*(?<!\\d)(?<d2>\\d{1,2})(?!\\d)\\s+de\\s+(?<m1>${MONTH_NAMES}))` +
+    `|(?:(?<!\\d)(?<d3>\\d{1,2})(?!\\d)\\s+de\\s+(?<m2>${MONTH_NAMES}))`,
+  "g",
+);
+const YEAR_RE = /de\s+(\d{4})/g;
+// "1°"/"1º" ordinal day markers ("1° de agosto") normalize to a plain digit.
+const ORDINAL_DAY_RE = /(\d+)[°º]\s*(de\b)/g;
+
+// Extracts a date OR date range from free-form pt-BR prose — e.g. event
+// listing fields like "Data: 30 de julho a 2 de agosto de 2026, quinta a
+// domingo" or a roundup-post title like "agenda infantil ... para 10 a 12 de
+// junho" (no year). Handles:
+//   - a single date ("30 de julho de 2026")
+//   - a range joined by "a" or "e" ("25 e 26 de julho de 2026")
+//   - a range crossing a year boundary, each side keeping its own year
+//     ("27 de Dezembro de 2026 a 03 de Janeiro de 2027")
+//   - more than two day-month tokens (e.g. a recurring/split schedule) — start
+//     is the earliest resolved date, end is the latest
+//   - a missing year, inferred via the same 30-day-past rollover used
+//     elsewhere in the scraper (parseDayMonthWithRollover)
+// `rollover` (default true) controls what happens to a day-month token with
+// no explicit year: true uses the standard 30-day-past-rolls-to-next-year
+// heuristic (parseDayMonthWithRollover); false always resolves to `now`'s
+// year. Disable it for sources where "now" may itself be stale (e.g. a
+// roundup post the site hasn't refreshed in a while) — there, a genuinely
+// past resulting date is correctly filtered out by the app's own
+// upcoming-events logic, whereas a rollover would fabricate a future date a
+// full year off.
+export function extractPtBrDateRange(
+  text: string,
+  now: Date = new Date(),
+  options: { rollover?: boolean } = {},
+): DateRange | null {
+  const normalized = stripAccents(text).replace(ORDINAL_DAY_RE, "$1 $2");
+
+  const dayMonthTokens: { day: number; month: number; end: number }[] = [];
+  DAY_MONTH_RE.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = DAY_MONTH_RE.exec(normalized)) !== null) {
+    const g = m.groups!;
+    const end = m.index + m[0].length;
+    if (g.d1 !== undefined) {
+      const month = PT_MONTHS[g.m1];
+      dayMonthTokens.push({ day: Number(g.d1), month, end }, { day: Number(g.d2), month, end });
+    } else {
+      dayMonthTokens.push({ day: Number(g.d3), month: PT_MONTHS[g.m2], end });
+    }
+  }
+  if (dayMonthTokens.length === 0) return null;
+
+  const yearTokens: { year: number; index: number }[] = [];
+  YEAR_RE.lastIndex = 0;
+  while ((m = YEAR_RE.exec(normalized)) !== null) {
+    yearTokens.push({ year: Number(m[1]), index: m.index });
+  }
+
+  const dates = dayMonthTokens.map(({ day, month, end }) => {
+    const year = yearTokens.find((y) => y.index >= end) ?? yearTokens.at(-1);
+    if (year) return new Date(year.year, month - 1, day);
+    return options.rollover === false
+      ? new Date(now.getFullYear(), month - 1, day)
+      : parseDayMonthWithRollover(day, month, now);
+  });
+
+  return {
+    start: dates.reduce((a, b) => (a < b ? a : b)),
+    end: dates.reduce((a, b) => (a > b ? a : b)),
+  };
+}
+
 // Brazil has had no DST since 2019, so America/Sao_Paulo is a fixed UTC-3.
 const SAO_PAULO_OFFSET_MS = 3 * 60 * 60 * 1000;
 
